@@ -1,0 +1,20 @@
+{
+  "name": "sunbay-softpos-presentation",
+  "version": "1.0.0",
+  "description": "SUNBAY SoftPOS 演示文稿",
+  "scripts": {
+    "dev": "slidev slides.md",
+    "dev:tech": "slidev slides-tech.md",
+    "build": "slidev build slides.md",
+    "build:tech": "slidev build slides-tech.md",
+    "export": "slidev export slides.md",
+    "export:tech": "slidev export slides-tech.md"
+  },
+  "dependencies": {
+    "@slidev/cli": "^0.48.0",
+    "@slidev/theme-seriph": "latest"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.40.0"
+  }
+}

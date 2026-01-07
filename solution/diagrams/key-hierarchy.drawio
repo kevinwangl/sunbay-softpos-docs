@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T10:00:00.000Z" agent="Kiro" version="22.1.0" type="device">
+  <diagram id="key-hierarchy" name="密钥层次结构">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- 标题 -->
+        <mxCell id="title" value="SUNBAY MPoC SDK 密钥层次结构 (SE/TEE/WhiteBox) - v2.8" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+        
+        <!-- 证书层 (共同前提) -->
+        <mxCell id="cert-section" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="80" y="80" width="1200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cert-title" value="📜 证书层 (所有模式的共同前提)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="100" y="90" width="350" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- Certificate Chain -->
+        <mxCell id="cert-root" value="🔐 Root CA&#xa;(10年, 自签名)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#E65100;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="125" width="120" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="cert-int" value="🔐 Intermediate CA&#xa;(5年)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="125" width="120" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="cert-dev" value="📱 Device Cert&#xa;(1年, 可续期)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFB74D;strokeColor=#E65100;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="440" y="125" width="120" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="cert-arrow1" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#E65100;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="240" y="147" as="sourcePoint"/>
+            <mxPoint x="280" y="147" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cert-arrow2" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#E65100;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="400" y="147" as="sourcePoint"/>
+            <mxPoint x="440" y="147" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Device Key Pair -->
+        <mxCell id="dev-keypair" value="🔑 设备 ECC 密钥对 (P-256)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="125" width="180" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="dev-priv" value="私钥: Android Keystore&#xa;(不可导出)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="610" y="175" width="160" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Storage Location -->
+        <mxCell id="storage-note" value="存储位置: Android Keystore (证书+私钥)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="820" y="125" width="200" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- HSM CA -->
+        <mxCell id="hsm-ca" value="RKI CloudHSM&#xa;/RKI/api/v1/ca/sign" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECB3;strokeColor=#FFA000;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="125" width="180" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- TEE Type Selection -->
+        <mxCell id="tee-select" value="TEE 类型检测" style="rhombus;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="250" width="140" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrow from cert to TEE select -->
+        <mxCell id="cert-to-tee" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#388E3C;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="220" as="sourcePoint"/>
+            <mxPoint x="670" y="250" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- SE Mode -->
+        <mxCell id="se-section" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="350" width="350" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="se-title" value="🔒 SE 模式 (Secure Element)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="120" y="360" width="270" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="se-level" value="安全级别: ⭐⭐⭐ 最高" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="150" y="385" width="210" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="se-dukpt" value="🔑 DUKPT IPEK&#xa;(Initial PIN Encryption Key)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="415" width="270" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="se-ksn" value="KSN: FFFF9876543210E00001 (21位)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="140" y="465" width="230" height="16" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="se-derived" value="🔐 派生密钥 (每笔交易唯一)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#388E3C;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="490" width="270" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="se-storage" value="存储位置: SE 芯片内 (硬件隔离)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#2E7D32;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="540" width="270" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="se-source" value="密钥来源: RKI HSM 下载&#xa;/RKI/api/v1/keys/download" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=2;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="140" y="580" width="230" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- TEE Mode -->
+        <mxCell id="tee-section" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="480" y="350" width="350" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="tee-title" value="🛡️ TEE 模式 (ARM TrustZone)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="520" y="360" width="270" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tee-level" value="安全级别: ⭐⭐ 高" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="550" y="385" width="210" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="tee-dukpt" value="🔑 DUKPT IPEK&#xa;(Initial PIN Encryption Key)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="415" width="270" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="tee-ksn" value="KSN: FFFF9876543210E00001 (21位)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="540" y="465" width="230" height="16" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="tee-derived" value="🔐 派生密钥 (每笔交易唯一)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90CAF9;strokeColor=#1976D2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="490" width="270" height="35" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="tee-storage" value="存储位置: TEE 安全区 (TrustZone)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#64B5F6;strokeColor=#1565C0;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="540" width="270" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="tee-source" value="密钥来源: RKI HSM 下载&#xa;/RKI/api/v1/keys/download" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=2;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="540" y="580" width="230" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- WhiteBox Mode -->
+        <mxCell id="wb-section" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="880" y="350" width="400" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="wb-title" value="🔐 WhiteBox 模式 (软件白盒加密)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="920" y="360" width="320" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="wb-level" value="安全级别: ⭐ 中等 (必须使用 DH-ECC)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="940" y="385" width="280" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="wb-eph" value="🔑 临时 ECDH 密钥对 (P-256)&#xa;(每次会话生成)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="920" y="415" width="160" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="wb-server-eph" value="🔑 服务端临时公钥&#xa;(A/M-Backend 返回)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="415" width="160" height="45" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="wb-ecdh" value="ECDH 密钥协商" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="470" width="160" height="16" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="wb-session" value="🔐 AES-256 会话密钥&#xa;(HKDF-SHA256 派生, 30分钟有效)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F48FB1;strokeColor=#C2185B;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="490" width="240" height="45" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="wb-storage" value="存储位置: WhiteBox 保护内存" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EC407A;strokeColor=#AD1457;fontSize=10;fontStyle=1;fontColor=#FFF;" vertex="1" parent="1">
+          <mxGeometry x="960" y="550" width="240" height="30" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="wb-source" value="密钥来源: DH-ECC 密钥交换&#xa;POST MPoC/api/keys/ecc/exchange" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=2;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="960" y="590" width="240" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows from TEE select -->
+        <mxCell id="tee-to-se" value="SE" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#388E3C;fontColor=#388E3C;fontSize=10;fontStyle=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="600" y="280" as="sourcePoint"/>
+            <mxPoint x="255" y="350" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="255" y="280"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tee-to-tee" value="TEE" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#1976D2;fontColor=#1976D2;fontSize=10;fontStyle=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="310" as="sourcePoint"/>
+            <mxPoint x="655" y="350" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tee-to-wb" value="WhiteBox" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#C2185B;fontColor=#C2185B;fontSize=10;fontStyle=1;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="740" y="280" as="sourcePoint"/>
+            <mxPoint x="1080" y="350" as="targetPoint"/>
+            <Array as="points">
+              <mxPoint x="1080" y="280"/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+
+<!-- Continuing key-hierarchy.drawio - Processor Keys and Legend -->
+
+        <!-- Processor Keys Section -->
+        <mxCell id="proc-section" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF6000;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="670" width="600" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="proc-title" value="🏦 Processor 密钥 (A/M-Backend → Processor)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="100" y="680" width="400" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="zpk-title" value="ZPK (Zone PIN Key) - 每日轮换" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="100" y="710" width="250" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="zpk-tsys" value="ZPK_TSYS&#xa;3DES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF6000;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="735" width="100" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="zpk-fiserv" value="ZPK_Fiserv&#xa;AES-128" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF6000;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="735" width="100" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="zpk-elavon" value="ZPK_Elavon&#xa;3DES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF6000;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="735" width="100" height="45" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="zmk-title" value="ZMK (Zone Master Key) - 年度轮换" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="100" y="790" width="250" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="zmk-note" value="用于加密传输 ZPK (PCI PIN 认证要求)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;fontStyle=2;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="100" y="810" width="280" height="16" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="hsm-storage" value="存储位置: RKI CloudHSM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="735" width="180" height="45" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="670" width="560" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="📋 密钥生命周期与存储位置" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="740" y="680" width="250" height="25" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row1" value="设备证书/私钥" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="715" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val1" value="1年 (可续期) | Android Keystore" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="870" y="715" width="200" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row2" value="DUKPT IPEK (SE/TEE)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="738" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val2" value="长期 (直到KSN耗尽) | TEE/SE 安全区" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="870" y="738" width="220" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row3" value="DUKPT 派生密钥" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="761" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val3" value="每笔交易唯一 | 内存 (用后销毁)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="870" y="761" width="200" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row4" value="WhiteBox 会话密钥" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="784" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val4" value="30分钟 (过期重建) | WhiteBox 保护内存" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="870" y="784" width="230" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row5" value="ZPK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="807" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val5" value="24小时 (每日轮换) | RKI HSM" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="870" y="807" width="200" height="18" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-row6" value="ZMK" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="740" y="830" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-val6" value="1年 (年度轮换) | Processor HSM" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#9C27B0;" vertex="1" parent="1">
+          <mxGeometry x="870" y="830" width="200" height="18" as="geometry" />
+        </mxCell>
+        
+        <!-- Important Note -->
+        <mxCell id="note-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="80" y="870" width="1200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="note-title" value="⚠️ 重要安全要求" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="100" y="878" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="note-1" value="• DUKPT 密钥必须存储在 TEE/SE 安全环境内，不能存储到 Android Keystore" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="100" y="900" width="500" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="note-2" value="• WhiteBox 模式必须使用 DH-ECC 密钥交换，不能使用 DUKPT" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="620" y="900" width="400" height="16" as="geometry" />
+        </mxCell>
+        <mxCell id="note-3" value="• 设备证书是所有模式的共同前提，必须先完成证书签发" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="1040" y="900" width="350" height="16" as="geometry" />
+        </mxCell>
+        
+        <!-- Version -->
+        <mxCell id="version" value="Version: v2.8 | 2024-12-31 | SUNBAY MPoC SDK 密钥层次结构" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#999;" vertex="1" parent="1">
+          <mxGeometry x="500" y="950" width="400" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

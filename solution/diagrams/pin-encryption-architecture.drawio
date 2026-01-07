@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T13:48:00.000Z" agent="Kiro" version="22.1.0">
+  <diagram id="pin-encryption-arch" name="PIN Encryption Architecture">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- Title -->
+        <mxCell id="title" value="SUNBAY MPoC SDK PIN 加密架构对比 (DUKPT vs WhiteBox DH-ECC) - v2.8" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="1200" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="基于 TEE 类型自动选择加密模式：SE/TEE → DUKPT | WhiteBox → DH-ECC" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=2;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="350" y="60" width="900" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- DUKPT Mode Section -->
+        <mxCell id="dukpt-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="400" height="500" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-title" value="🔒 DUKPT 模式 (SE/TEE 设备)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="150" y="115" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-security" value="⭐⭐⭐ 最高安全级别" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#2E7D32;" vertex="1" parent="1">
+          <mxGeometry x="150" y="145" width="200" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- DUKPT Flow -->
+        <mxCell id="dukpt-step1" value="1. HSM 生成 DUKPT IPEK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="180" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-step2" value="2. 加密传输到设备" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#388E3C;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="250" y="180" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-step3" value="3. 存储到 TEE/SE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#2E7D32;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="240" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-step4" value="4. 每笔交易派生唯一密钥" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#66BB6A;strokeColor=#2E7D32;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="250" y="240" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-step5" value="5. 3DES/AES 加密 PIN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4CAF50;strokeColor=#1B5E20;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="300" width="160" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- DUKPT Key Hierarchy -->
+        <mxCell id="dukpt-hierarchy-title" value="DUKPT 密钥层次" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="150" y="360" width="200" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-bdk" value="BDK (Base Derivation Key)&#xa;HSM 管理" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="390" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-ipek" value="IPEK (Initial PIN Encryption Key)&#xa;设备存储" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="210" y="390" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-txn-key" value="Transaction Key&#xa;每笔交易唯一" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4CAF50;strokeColor=#1B5E20;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="140" y="460" width="120" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- DUKPT KSN Format -->
+        <mxCell id="dukpt-ksn-title" value="KSN 格式 (21位十六进制)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="70" y="530" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="dukpt-ksn-format" value="FFFF 9876543210 E00001&#xa;│    │          │&#xa;│    │          └── 交易计数器 (21 bits)&#xa;│    └────────────── 设备标识 (59 bits)&#xa;└───────────────────── 密钥集 ID (4 bits)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="70" y="550" width="340" height="80" as="geometry"/>
+        </mxCell>
+                <mxCell id="wb-title" value="🛡️ WhiteBox 模式&#xa;(DH-ECC)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#C2185B;" parent="1" vertex="1">
+                    <mxGeometry x="270" y="210" width="135" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="wb-session" value="🔑 AES-256 会话密钥&#xa;(ECDH + HKDF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="265" y="250" width="145" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="wb-lifetime" value="30分钟有效期&#xa;(自动续期)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F48FB1;strokeColor=#C2185B;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="265" y="300" width="145" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="wb-encrypt" value="AES-GCM 加密&#xa;PIN Block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EC407A;strokeColor=#AD1457;fontSize=10;fontStyle=1;fontColor=#FFF;" parent="1" vertex="1">
+                    <mxGeometry x="265" y="345" width="145" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- PIN Input -->
+                <mxCell id="pin-input" value="🔢 PIN 输入 (安全键盘)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECB3;strokeColor=#FFA000;strokeWidth=1;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="420" width="240" height="35" as="geometry"/>
+                </mxCell>
+                
+                <!-- PIN Block Format -->
+                <mxCell id="pin-format" value="ISO 9564 Format 0 PIN Block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE0B2;strokeColor=#FF6000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="465" width="240" height="30" as="geometry"/>
+                </mxCell>
+                
+                <!-- Encrypted Output -->
+                <mxCell id="encrypted-output" value="加密 PIN Block 输出" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="510" width="240" height="35" as="geometry"/>
+                </mxCell>
+                
+                <!-- Arrows in SDK -->
+                <mxCell id="tee-to-dukpt" value="SE/TEE" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#388E3C;fontColor=#388E3C;fontSize=9;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="200" y="180" as="sourcePoint"/>
+                        <mxPoint x="142" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="tee-to-wb" value="WhiteBox" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#C2185B;fontColor=#C2185B;fontSize=9;" edge="1" parent="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="280" y="180" as="sourcePoint"/>
+                        <mxPoint x="337" y="200" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                
+                <!-- A/M-Backend Section -->
+                <mxCell id="backend-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="80" width="400" height="480" as="geometry"/>
+                </mxCell>
+                <mxCell id="backend-title" value="🖥️ A/M-Backend + POSP" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#388E3C;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="90" width="240" height="30" as="geometry"/>
+                </mxCell>
+                
+                <!-- RKI HSM -->
+                <mxCell id="rki-hsm" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="130" width="360" height="300" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-title" value="🔐 RKI CloudHSM" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2E7D32;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="140" width="200" height="25" as="geometry"/>
+                </mxCell>
+                
+                <!-- HSM Functions -->
+                <mxCell id="hsm-dukpt-recv" value="接收 DUKPT 加密 PIN&#xa;(3DES/AES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#388E3C;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="175" width="150" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-wb-recv" value="接收 WhiteBox 加密 PIN&#xa;(AES-GCM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#388E3C;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="710" y="175" width="150" height="40" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="hsm-decrypt" value="HSM 安全边界内解密" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#2E7D32;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="235" width="240" height="35" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="hsm-plainpin" value="明文 PIN (仅在 HSM 内)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=10;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="285" width="240" height="30" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="hsm-translate" value="PIN 转加密 (Re-encryption)&#xa;使用目标 Processor 的 ZPK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#81C784;strokeColor=#2E7D32;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="330" width="240" height="45" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="hsm-zpk" value="ZPK_TSYS | ZPK_Fiserv | ZPK_Elavon" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#A5D6A7;strokeColor=#388E3C;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="580" y="390" width="240" height="25" as="geometry"/>
+                </mxCell>
+                
+                <!-- Database -->
+                <mxCell id="db-box" value="💾 PostgreSQL + Redis" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCEDC8;strokeColor=#689F38;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="450" width="360" height="35" as="geometry"/>
+                </mxCell>
+                
+                <!-- Transaction Token -->
+                <mxCell id="token-box" value="🎫 交易鉴证 Token&#xa;POST MPoC/api/transactions/attest&#xa;POSP 验证: POST MPoC/api/tokens/verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="500" width="360" height="55" as="geometry"/>
+                </mxCell>
+                
+                <!-- Processor Section -->
+                <mxCell id="processor-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;dashed=0;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="80" width="280" height="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="processor-title" value="🏦 Processors (美国)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#F57C00;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="90" width="160" height="25" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="tsys" value="TSYS&#xa;3DES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;strokeWidth=2;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="130" width="80" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="fiserv" value="Fiserv&#xa;AES-128" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;strokeWidth=2;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="130" width="80" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="elavon" value="Elavon&#xa;3DES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;strokeWidth=2;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1140" y="130" width="80" height="50" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="zmk-note" value="ZMK 交换 (PCI PIN 认证)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#F57C00;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="1000" y="195" width="180" height="18" as="geometry"/>
+                </mxCell>
+                
+                <!-- Card Network -->
+                <mxCell id="card-network" value="💳 Card Network&#xa;(Visa / Mastercard / Amex / Discover)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;strokeWidth=2;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="230" width="220" height="50" as="geometry"/>
+                </mxCell>
+                
+                <!-- Issuer -->
+                <mxCell id="issuer" value="🏛️ Issuing Bank" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFB74D;strokeColor=#E65100;strokeWidth=2;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1020" y="300" width="140" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- Arrows -->
+                <mxCell id="arrow1" value="HTTPS/TLS 1.3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#FF6000;fontColor=#FF6000;fontSize=10;fontStyle=1;" parent="1" edge="1" source="encrypted-output" target="backend-group">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="arrow2" value="ZPK 加密" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#FFA000;fontColor=#FFA000;fontSize=10;fontStyle=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" edge="1" source="hsm-zpk" target="processor-group">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="arrow3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#E65100;" parent="1" edge="1" source="processor-group" target="card-network">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="arrow4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#E65100;" parent="1" edge="1" source="card-network" target="issuer">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
+
+<!-- Continuing pin-encryption-architecture.drawio - Legend and Notes -->
+
+                <!-- Legend -->
+                <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="580" width="400" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-title" value="📋 加密模式对比" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="60" y="590" width="150" height="25" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-header" value="特性" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="620" width="80" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-header2" value="DUKPT (SE/TEE)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="620" width="120" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-header3" value="WhiteBox DH-ECC" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="620" width="130" height="16" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r1" value="密钥来源" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="640" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r1v1" value="HSM 下载" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="640" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r1v2" value="ECDH 协商" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="640" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r2" value="密钥生命周期" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="658" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r2v1" value="长期 (KSN耗尽)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="658" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r2v2" value="30分钟 (会话级)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="658" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r3" value="每笔交易密钥" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="676" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r3v1" value="自动派生唯一" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="676" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r3v2" value="复用会话密钥" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="676" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r4" value="离线支持" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="694" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r4v1" value="✅ 支持" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="694" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r4v2" value="⚠️ 有限 (会话内)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="694" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r5" value="安全级别" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="712" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r5v1" value="⭐⭐⭐ 最高" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="712" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r5v2" value="⭐⭐ 中等" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="712" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="legend-r6" value="存储位置" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="60" y="730" width="80" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r6v1" value="TEE/SE 安全区" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="150" y="730" width="120" height="14" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-r6v2" value="WhiteBox 保护内存" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;" vertex="1" parent="1">
+                    <mxGeometry x="290" y="730" width="130" height="14" as="geometry"/>
+                </mxCell>
+                
+                <!-- Security Notes -->
+                <mxCell id="security-note" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="580" width="400" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-title" value="🔒 安全要点" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="590" width="150" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-1" value="• 明文 PIN 仅在 HSM 安全边界内存在" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="620" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-2" value="• 所有传输均使用 TLS 1.3 加密" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="640" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-3" value="• DUKPT 密钥必须存储在 TEE/SE，不能存储到 Android Keystore" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="660" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-4" value="• WhiteBox 模式必须使用 DH-ECC，不能使用 DUKPT" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="680" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-5" value="• WhiteBox 会话密钥 30 分钟过期，自动续期" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="700" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-6" value="• ZPK 每日轮换 (24小时)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="720" width="360" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-7" value="• PIN Block 格式: ISO 9564 Format 0" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="740" width="360" height="16" as="geometry"/>
+                </mxCell>
+                
+                <!-- Compliance Notes -->
+                <mxCell id="compliance-note" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="960" y="400" width="280" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-title" value="📋 合规认证" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#3F51B5;" parent="1" vertex="1">
+                    <mxGeometry x="980" y="410" width="150" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-1" value="• PCI-DSS ✅ 已认证" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="440" width="240" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-2" value="• PCI PIN 🔄 进行中" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="462" width="240" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-3" value="• PCI P2PE 📋 规划中" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="484" width="240" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-4" value="HSM: RKI CloudHSM" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=2;fontColor=#3F51B5;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="510" width="240" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="compliance-5" value="ECC Curve: P-256 (secp256r1)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=2;fontColor=#3F51B5;" vertex="1" parent="1">
+                    <mxGeometry x="980" y="530" width="240" height="16" as="geometry"/>
+                </mxCell>
+                
+                <!-- Version -->
+                <mxCell id="version" value="Version: v2.8 | 2024-12-31 | SUNBAY MPoC SDK PIN 加密架构" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;fontColor=#999;" parent="1" vertex="1">
+                    <mxGeometry x="500" y="780" width="400" height="20" as="geometry"/>
+                </mxCell>
+
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
+        
+        <!-- WhiteBox Mode Section -->
+        <mxCell id="whitebox-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="400" height="500" as="geometry"/>
+        </mxCell>
+        <mxCell id="whitebox-title" value="🛡️ WhiteBox DH-ECC 模式" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="600" y="115" width="200" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="whitebox-security" value="⭐ 中等安全级别" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#AD1457;" vertex="1" parent="1">
+          <mxGeometry x="600" y="145" width="200" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- WhiteBox Flow -->
+        <mxCell id="wb-step1" value="1. 生成临时 ECDH 密钥对" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="180" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-step2" value="2. 与服务端交换公钥" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F48FB1;strokeColor=#C2185B;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="180" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-step3" value="3. ECDH 计算共享密钥" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EC407A;strokeColor=#AD1457;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="240" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-step4" value="4. HKDF 派生会话密钥" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E91E63;strokeColor=#AD1457;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="240" width="160" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-step5" value="5. AES-256-GCM 加密 PIN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C2185B;strokeColor=#880E4F;fontSize=11;fontStyle=1;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="610" y="300" width="160" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- WhiteBox Key Hierarchy -->
+        <mxCell id="wb-hierarchy-title" value="WhiteBox 密钥层次" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=14;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="600" y="360" width="200" height="25" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-device-key" value="设备 ECC 密钥对&#xa;(P-256, Keystore)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="390" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-ephemeral-key" value="临时 ECDH 密钥对&#xa;(单次使用)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="660" y="390" width="120" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-session-key" value="AES-256 会话密钥&#xa;(30分钟有效)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="590" y="460" width="120" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- WhiteBox Session Lifecycle -->
+        <mxCell id="wb-lifecycle-title" value="会话生命周期" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="520" y="530" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="wb-lifecycle-info" value="• 会话有效期: 30 分钟&#xa;• 最大交易数: 100 笔&#xa;• 自动续期: 过期前 5 分钟&#xa;• 存储位置: WhiteBox 保护内存" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="550" width="340" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- Comparison Table -->
+        <mxCell id="comparison-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="950" y="100" width="400" height="500" as="geometry"/>
+        </mxCell>
+        <mxCell id="comparison-title" value="🔍 加密模式对比" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="115" width="200" height="30" as="geometry"/>
+        </mxCell>
+        
+        <!-- Comparison Table Content -->
+        <mxCell id="comp-header-bg" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E0E0E0;strokeColor=#9E9E9E;" vertex="1" parent="1">
+          <mxGeometry x="970" y="160" width="360" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-header" value="特性 | DUKPT (SE/TEE) | WhiteBox DH-ECC" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="980" y="165" width="340" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="comp-tee-type" value="适用TEE类型 | SE, TEE | WhiteBox" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="200" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-key-source" value="密钥来源 | HSM下载 | ECDH协商" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="225" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-lifecycle" value="密钥生命周期 | 长期(直到KSN耗尽) | 会话级(30分钟)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="250" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-per-txn" value="每笔交易密钥 | 自动派生唯一密钥 | 复用会话密钥" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="275" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-network" value="网络依赖 | 仅初始下载 | 每30分钟重新交换" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="300" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-offline" value="离线支持 | 支持 | 有限支持(会话有效期内)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="325" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-forward-sec" value="前向安全性 | 每笔交易独立 | 会话内共享" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="350" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="comp-security" value="安全级别 | ⭐⭐⭐ 最高 | ⭐ 中等" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="980" y="375" width="340" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- PIN Block Format -->
+        <mxCell id="pinblock-title" value="PIN Block 格式 (ISO 9564 Format 0)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="980" y="420" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pinblock-formula" value="PIN Block = PIN Field XOR PAN Field" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=11;fontStyle=1;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="980" y="445" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="pinblock-pin-field" value="PIN Field: 0|N|PPPPPPPPPPPP&#xa;(N=PIN长度, P=PIN数字, 填充F)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="980" y="470" width="340" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="pinblock-pan-field" value="PAN Field: 0000|PAN[3..14]|0&#xa;(PAN 右起第2位到第13位)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="980" y="505" width="340" height="30" as="geometry"/>
+        </mxCell>
+        
+        <!-- Storage Requirements -->
+        <mxCell id="storage-title" value="⚠️ 存储要求" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=12;fontStyle=1;fontColor=#C62828;" vertex="1" parent="1">
+          <mxGeometry x="980" y="550" width="340" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="storage-req" value="• DUKPT密钥: 必须存储在TEE/SE安全环境内&#xa;• 设备证书: 存储在Android Keystore&#xa;• WhiteBox会话密钥: 存储在WhiteBox保护内存&#xa;• PIN: 仅内存，不持久化，用后清除" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="575" width="340" height="60" as="geometry"/>
+        </mxCell>
+        
+        <!-- Arrows showing flow -->
+        <mxCell id="arrow-dukpt-flow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="150" y="220" as="sourcePoint"/>
+            <mxPoint x="150" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-dukpt-flow2" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="330" y="220" as="sourcePoint"/>
+            <mxPoint x="330" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-dukpt-flow3" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="240" y="280" as="sourcePoint"/>
+            <mxPoint x="240" y="300" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow-wb-flow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#C2185B;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="600" y="220" as="sourcePoint"/>
+            <mxPoint x="600" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-wb-flow2" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#C2185B;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="780" y="220" as="sourcePoint"/>
+            <mxPoint x="780" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow-wb-flow3" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#C2185B;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="690" y="280" as="sourcePoint"/>
+            <mxPoint x="690" y="300" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

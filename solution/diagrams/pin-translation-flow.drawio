@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T13:48:00.000Z" agent="Kiro" version="22.1.0">
+    <diagram id="pin-translation-flow" name="PIN转加密流程">
+        <mxGraphModel dx="1054" dy="542" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="title" value="RKI CloudHSM PIN 转加密流程 (ECC → ZPK)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#1a1a1a;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="20" width="500" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="sdk-step1" value="1. 获取 Transaction Token&#10;POST MPoC/api/transactions/attest" style="rounded=1;whiteSpaceize=11;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="195" width="160" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-title" value="🔐 RKI CloudHSM 安全边界" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#2e7d32;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="110" width="320" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="app-step2" value="4. 提交到 POSP&#xa;POST /POSP/api/transactions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="200" width="170" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-step1" value="5. Token 验证&#xa;POST MPoC/api/tokens/verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="145" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="backend-api" value="API: MPoC/api" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontColor=#388E3C;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="375" width="120" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-title" value="🔐 RKI CloudHSM" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#7B1FA2;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="110" width="160" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-api" value="API: /RKI/api/v1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontColor=#7B1FA2;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="135" width="160" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-1v" value="MPoC/api" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="473" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-2v" value="/POSP/api" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#C2185B;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="513" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-3v" value="/RKI/api/v1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#7B1FA2;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="553" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="subtitle" value="SDK → App → POSP → HSM → Processor" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=2;fontColor=#666;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="55" width="400" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="sdk-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#FF6000;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="100" width="200" height="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="sdk-title" value="🛡️ MPoC SDK" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+                    <mxGeometry x="80" y="110" width="120" height="25" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="input3" value="会话密钥 ID&#10;(sessionKeyId)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1976d2;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="235" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="input4" value="PAN&#10;(用于构造 PIN Block)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1976d2;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="280" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="input5" value="目标 ZPK ID&#10;(zpk-tsys-001)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#bbdefb;strokeColor=#1976d2;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="100" y="325" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;strokeWidth=3;" vertex="1" parent="1">
+                    <mxGeometry x="360" y="100" width="480" height="590" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="step1-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#388e3c;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="160" width="400" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1-num" value="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#388e3c;strokeColor=none;fontColor=#ffffff;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="170" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1-title" value="AES-GCM 解密" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2e7d32;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="170" width="150" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="step1-desc" value="• 使用会话密钥 (AES-256) 解密&#10;• 验证 AuthTag 完整性&#10;• 得到明文 PIN (仅在 HSM 内部)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="200" width="360" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="plaintext-pin" value="🔓 明文 PIN&#10;(HSM 内部，不可导出)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffcdd2;strokeColor=#c62828;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="280" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-s1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#c62828;" edge="1" parent="1" source="step1-box" target="plaintext-pin">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#388e3c;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="340" width="400" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2-num" value="2" style="ellipse;whiteSpace=wrap;html=1;fillColor=#388e3c;strokeColor=none;fontColor=#ffffff;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="350" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2-title" value="构造 ISO 9564 Format 0 PIN Block" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2e7d32;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="350" width="300" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2-formula" value="PIN Block = PIN Field ⊕ PAN Field" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;fontColor=#1565c0;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="380" width="300" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="step2-example" value="示例: PIN=1234, PAN=4111111111111111&#10;PIN Field = 0x041234FFFFFFFFFF&#10;PAN Field = 0x0000111111111111&#10;PIN Block = 0x041225EEEEEEEEEE" style="text;html=1;strokeColor=none;fillColor=#e3f2fd;strokeColor=#1976d2;align=left;verticalAlign=top;whiteSpace=wrap;rounded=1;fontSize=10;fontFamily=Courier New;spacingLeft=5;spacingTop=3;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="405" width="360" height="65" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-s2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#388e3c;" edge="1" parent="1" source="plaintext-pin" target="step2-box">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#388e3c;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="400" y="550" width="400" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3-num" value="3" style="ellipse;whiteSpace=wrap;html=1;fillColor=#388e3c;strokeColor=none;fontColor=#ffffff;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="490" width="30" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3-title" value="ZPK 加密" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2e7d32;" vertex="1" parent="1">
+                    <mxGeometry x="450" y="490" width="150" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="step3-desc" value="• 选择目标 Processor 的 ZPK&#10;• 3DES-CBC (TSYS/Elavon) 或 AES-CBC (Fiserv)&#10;• 输出 16 字符 HEX 字符串" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="590" width="360" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-s3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#388e3c;" edge="1" parent="1" source="step2-box" target="step3-box">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="output-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#ff9800;strokeWidth=2;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="100" width="200" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="output-title" value="📤 输出数据" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#f57c00;" vertex="1" parent="1">
+                    <mxGeometry x="960" y="110" width="120" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="output1" value="translatedPinBlock&#10;1A2B3C4D5E6F7890" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe082;strokeColor=#ff9800;fontSize=11;fontFamily=Courier New;" vertex="1" parent="1">
+                    <mxGeometry x="940" y="150" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="output2" value="format&#10;ISO9564-0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe082;strokeColor=#ff9800;fontSize=11;" vertex="1" parent="1">
+                    <mxGeometry x="940" y="200" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="output3" value="keyCheckValue&#10;ABC123" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe082;strokeColor=#ff9800;fontSize=11;fontFamily=Courier New;" vertex="1" parent="1">
+                    <mxGeometry x="940" y="245" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-in" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#1976d2;" edge="1" parent="1" target="hsm-group">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-out" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=3;strokeColor=#ff9800;exitX=1;exitY=0.2;exitDx=0;exitDy=0;" edge="1" parent="1" source="hsm-group" target="output-group">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="to-processor" value="➡️ 发送到 Processor&#10;(TSYS / Fiserv / Elavon)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff8e1;strokeColor=#ffa000;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="340" width="200" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-proc" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#ffa000;" edge="1" parent="1" source="output-group" target="to-processor">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-box" value="🔒 安全保证&#10;&#10;✅ 明文 PIN 仅在 HSM 安全边界内存在&#10;✅ 所有密钥操作在 HSM 内部完成&#10;✅ 密钥不可导出&#10;✅ 符合 PCI PIN 安全要求" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828;strokeWidth=2;fontSize=11;align=left;verticalAlign=top;spacingLeft=10;spacingTop=5;" vertex="1" parent="1">
+                    <mxGeometry x="920" y="420" width="200" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="api-box" value="API: POST /api/pin/translate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#3f51b5;strokeWidth=1;fontSize=12;fontStyle=1;fontFamily=Courier New;" vertex="1" parent="1">
+                    <mxGeometry x="80" y="420" width="200" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
+                <mxCell id="app-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="100" width="200" height="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="app-title" value="📱 Android App" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#1976D2;" parent="1" vertex="1">
+                    <mxGeometry x="320" y="110" width="120" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="app-step1" value="3. 组装交易请求&#xa;Token + PIN Block + 交易数据" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BBDEFB;strokeColor=#1976D2;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="145" width="170" height="45" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="app-request" value="请求体:&#xa;• transactionToken&#xa;• encryptedPinBlock&#xa;• cardData (PAN, expiry)&#xa;• amount, currency" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#90CAF9;strokeColor=#1565C0;fontSize=9;align=left;spacingLeft=5;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="260" width="170" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="app-note" value="App 直接提交交易到 POSP" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontStyle=2;fontColor=#1976D2;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="350" width="170" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="100" width="280" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-title" value="🏦 SUNBAY POSP" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#C2185B;" parent="1" vertex="1">
+                    <mxGeometry x="600" y="110" width="120" height="25" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="posp-check" value="验证: Token有效性 + 金额匹配 + 设备状态" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#C2185B;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="190" width="240" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-step2" value="6. PIN 解密 (HSM 内)&#xa;DUKPT 或 AES-GCM 解密" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="215" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-plainpin" value="明文 PIN (仅在 HSM 安全边界内)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=9;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="265" width="200" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-step3" value="7. PIN Block 构造&#xa;ISO 9564 Format 0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="300" width="240" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-step4" value="8. ZPK 重加密&#xa;使用目标 Processor 的 ZPK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="345" width="240" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-zpk" value="ZPK_TSYS | ZPK_Fiserv | ZPK_Elavon" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EC407A;strokeColor=#AD1457;fontSize=9;fontStyle=1;fontColor=#FFF;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="395" width="200" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-step5" value="9. 路由到 Processor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F8BBD9;strokeColor=#C2185B;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="430" width="240" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="posp-note" value="POSP 负责 Token 验证 + PIN 转加密" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontStyle=2;fontColor=#C2185B;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="470" width="240" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="processor-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="840" y="100" width="200" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="processor-title" value="💳 Processors" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fontColor=#F57C00;" parent="1" vertex="1">
+                    <mxGeometry x="890" y="110" width="100" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="tsys" value="TSYS&#xa;(3DES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="145" width="70" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="fiserv" value="Fiserv&#xa;(AES-128)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="145" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="elavon" value="Elavon&#xa;(3DES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="195" width="70" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="other" value="Other..." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE082;strokeColor=#FFA000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="195" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="card-network" value="Card Network&#xa;(Visa/MC/Amex/Discover)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCC80;strokeColor=#E65100;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="250" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-sdk-app" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#FF6000;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="240" y="240" as="sourcePoint"/>
+                        <mxPoint x="280" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-app-posp" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#1976D2;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="480" y="240" as="sourcePoint"/>
+                        <mxPoint x="520" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-posp-proc" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#C2185B;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="800" y="240" as="sourcePoint"/>
+                        <mxPoint x="840" y="240" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="backend-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="840" y="340" width="200" height="160" as="geometry"/>
+                </mxCell>
+                <mxCell id="backend-title" value="🖥️ A/M-Backend" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#388E3C;" parent="1" vertex="1">
+                    <mxGeometry x="880" y="350" width="120" height="22" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="token-verify-api" value="Token Verify&#xa;/tokens/verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="400" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="attest-api" value="Transaction Attest&#xa;/transactions/attest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="950" y="400" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="key-api" value="Key Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C8E6C9;strokeColor=#388E3C;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="860" y="450" width="170" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-posp-backend" value="" style="endArrow=classic;startArrow=classic;html=1;strokeWidth=2;strokeColor=#388E3C;dashed=1;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="800" y="165" as="sourcePoint"/>
+                        <mxPoint x="840" y="420" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="820" y="165"/>
+                            <mxPoint x="820" y="420"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-posp-backend-label" value="Token 验证" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#388E3C;" parent="1" vertex="1">
+                    <mxGeometry x="800" y="280" width="60" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-group" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#9673A6;strokeWidth=2;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="100" width="200" height="400" as="geometry"/>
+                </mxCell>
+
+
+                <mxCell id="hsm-boundary" value="HSM 安全边界" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="1120" y="160" width="120" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-decrypt" value="PIN 解密&#xa;(DUKPT/AES-GCM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#7B1FA2;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="185" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-plainpin" value="明文 PIN&#xa;(不可导出)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCDD2;strokeColor=#C62828;fontSize=9;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="1120" y="230" width="120" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-pinblock" value="构造 PIN Block&#xa;ISO 9564 Format 0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#7B1FA2;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="275" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-reencrypt" value="ZPK 重加密&#xa;(3DES/AES)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#CE93D8;strokeColor=#7B1FA2;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="320" width="160" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-keys" value="密钥存储:&#xa;• BDK (DUKPT)&#xa;• Session Keys (WhiteBox)&#xa;• ZPK (Processor)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#BA68C8;strokeColor=#7B1FA2;fontSize=9;align=left;spacingLeft=5;fontColor=#FFF;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="370" width="160" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="hsm-note" value="所有密钥操作在 HSM 内完成" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontStyle=2;fontColor=#7B1FA2;" parent="1" vertex="1">
+                    <mxGeometry x="1100" y="450" width="160" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="arrow-posp-hsm" value="" style="endArrow=classic;startArrow=classic;html=1;strokeWidth=2;strokeColor=#9673A6;" parent="1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="800" y="350" as="sourcePoint"/>
+                        <mxPoint x="1080" y="350" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="arrow-posp-hsm-label" value="PIN 转加密" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;fontColor=#9673A6;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="900" y="330" width="80" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="420" width="200" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-title" value="📋 API 路径" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="430" width="100" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="legend-1" value="SDK → Backend:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="455" width="100" height="16" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="legend-2" value="App → POSP:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="495" width="100" height="16" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="legend-3" value="HSM:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="535" width="100" height="16" as="geometry"/>
+                </mxCell>
+
+                <mxCell id="legend-4" value="PIN Block: ISO 9564 Format 0" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=2;" parent="1" vertex="1">
+                    <mxGeometry x="55" y="575" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;strokeWidth=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="420" width="200" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-title" value="🔒 安全要点" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="430" width="100" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-1" value="• 明文 PIN 仅在 HSM 内存在" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="455" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-2" value="• 所有传输使用 TLS 1.3" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="475" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-3" value="• Token 一次性使用" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="495" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-4" value="• ZPK 每日轮换" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="515" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-5" value="• DUKPT 密钥存储在 TEE/SE" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="535" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-6" value="• WhiteBox 会话 30 分钟过期" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="555" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="security-7" value="• PCI-DSS / PCI PIN 合规" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontStyle=1;fontColor=#C62828;" parent="1" vertex="1">
+                    <mxGeometry x="295" y="575" width="170" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="version" value="Version: v2.2 | 2024-12-31" style="text;html=1;strokeColor=none;fillColor=none;align=right;verticalAlign=middle;fontSize=10;fontStyle=2;fontColor=#999;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="520" width="200" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

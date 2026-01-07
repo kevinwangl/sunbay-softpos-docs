@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T13:48:00.000Z" agent="Kiro" version="22.1.0">
+  <diagram id="init-flow-sequence" name="Initialization Flow Sequence">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- Title -->
+        <mxCell id="title" value="SUNBAY MPoC SDK 四阶段初始化流程序列图 (v2.2)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="300" y="20" width="1000" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="设备注册 → 证书签发 → 密钥初始化 → 交易处理" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=2;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="500" y="60" width="600" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- Actors -->
+        <mxCell id="app-actor" value="📱 Android App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="sdk-actor" value="🛡️ MPoC SDK" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="backend-actor" value="🖥️ A/M-Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="hsm-actor" value="🔐 RKI HSM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="630" y="120" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="posp-actor" value="🏦 SUNBAY POSP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="730" y="100" width="120" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- Lifelines -->
+        <mxCell id="app-lifeline" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#1976D2;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="140" as="sourcePoint"/>
+            <mxPoint x="110" y="1100" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sdk-lifeline" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#E65100;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="140" as="sourcePoint"/>
+            <mxPoint x="280" y="1100" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="backend-lifeline" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="140" as="sourcePoint"/>
+            <mxPoint x="450" y="1100" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hsm-lifeline" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#FFA000;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="140" as="sourcePoint"/>
+            <mxPoint x="620" y="1100" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="posp-lifeline" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#C2185B;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="790" y="140" as="sourcePoint"/>
+            <mxPoint x="790" y="1100" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
+        
+        <!-- Phase 1: Device Registration -->
+        <mxCell id="phase1-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;opacity=20;" vertex="1" parent="1">
+          <mxGeometry x="30" y="160" width="840" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase1-title" value="阶段一: 设备注册 (Device Registration)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="170" width="300" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 1: Initialize -->
+        <mxCell id="step1-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#E65100;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="110" y="200" as="sourcePoint"/>
+            <mxPoint x="280" y="200" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step1-label" value="1. MpocSdk.initialize(config)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="130" y="180" width="120" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 2: Security Check -->
+        <mxCell id="step2-note" value="安全环境检测" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="290" y="210" width="80" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 3: Device Registration -->
+        <mxCell id="step3-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="250" as="sourcePoint"/>
+            <mxPoint x="450" y="250" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step3-label" value="2. POST /devices/register" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="320" y="230" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 4: Response -->
+        <mxCell id="step4-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="270" as="sourcePoint"/>
+            <mxPoint x="280" y="270" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step4-label" value="deviceId + accessToken" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="320" y="275" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 5: WebSocket -->
+        <mxCell id="step5-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9C27B0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="300" as="sourcePoint"/>
+            <mxPoint x="450" y="300" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step5-label" value="3. WebSocket 连接" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#9C27B0;" vertex="1" parent="1">
+          <mxGeometry x="320" y="305" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 6: Callback -->
+        <mxCell id="step6-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#E65100;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="330" as="sourcePoint"/>
+            <mxPoint x="110" y="330" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step6-label" value="onInitSuccess(deviceId, teeType)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="130" y="335" width="120" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Phase 2: Certificate Signing -->
+        <mxCell id="phase2-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;strokeWidth=2;opacity=20;" vertex="1" parent="1">
+          <mxGeometry x="30" y="380" width="840" height="180" as="geometry"/>
+        </mxCell>
+        <mxCell id="phase2-title" value="阶段二: 证书签发 (Certificate Signing)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="40" y="390" width="300" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 7: Generate KeyPair -->
+        <mxCell id="step7-note" value="生成ECC密钥对" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="290" y="420" width="80" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 8: Submit CSR -->
+        <mxCell id="step8-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="460" as="sourcePoint"/>
+            <mxPoint x="450" y="460" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step8-label" value="4. POST /certificates/sign" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="320" y="440" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 9: HSM Sign -->
+        <mxCell id="step9-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FFA000;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="480" as="sourcePoint"/>
+            <mxPoint x="620" y="480" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step9-label" value="5. POST /RKI/ca/sign" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="490" y="460" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 10: Certificate Response -->
+        <mxCell id="step10-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FFA000;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="620" y="500" as="sourcePoint"/>
+            <mxPoint x="450" y="500" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step10-label" value="certificate + chain" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="490" y="505" width="110" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 11: Certificate to SDK -->
+        <mxCell id="step11-arrow" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="450" y="520" as="sourcePoint"/>
+            <mxPoint x="280" y="520" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="step11-label" value="certificate + certificateChain" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="310" y="525" width="130" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Step 12: Store Certificate -->
+        <mxCell id="step12-note" value="存储证书到Keystore" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="290" y="540" width="100" height="25" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

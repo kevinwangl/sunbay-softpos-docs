@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T13:48:00.000Z" agent="Kiro" version="22.1.0">
+    <diagram name="SUNBAY SoftPOS Solutions" id="cZ-KOBht3GeF4g-A-XAZ">
+        <mxGraphModel dx="869" dy="425" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-1" value="SUNBAY SoftPOS Solutions (with SCRP) - v2.2" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="10" width="450" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;strokeWidth=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="190" y="170" width="280" height="430" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-3" value="SCRP Device" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="185" width="100" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-4" value="SUNMI/RKI RKI Services" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2E6;strokeColor=#FF6000;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="215" width="220" height="45" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-5" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE0CC;strokeColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="280" width="240" height="130" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-6" value="L2 Payment Kernel" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="285" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-7" value="VISA/Master Card/Amex/Discover/JCP/UPI" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="310" width="220" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-8" value="EMV Kernel" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="250" y="355" width="160" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-9" value="NFC Reader" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#999999;fontSize=10;" parent="1" vertex="1">
+                    <mxGeometry x="210" y="440" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-10" value="SE" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFE0CC;strokeColor=#FF6000;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="340" y="440" width="80" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-11" value="SUNMI OS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0F0F0;strokeColor=#999999;fontSize=11;" parent="1" vertex="1">
+                    <mxGeometry x="220" y="520" width="220" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-12" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#FF6000;strokeWidth=2;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="540" y="170" width="280" height="490" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-13" value="SUNMI TAPro" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="180" width="200" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-14" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2E6;strokeColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="210" width="250" height="145" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-15" value="SoftPOS SDK(&lt;font style=&quot;color: light-dark(rgb(255, 96, 0), rgb(237, 237, 237));&quot;&gt;L3 Payment Function&lt;/font&gt;)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="213" width="250" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-16" value="Sale" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="235" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-17" value="Void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="235" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-18" value="Auth" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="265" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-19" value="Capture" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="265" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-20" value="TipAdjust" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="295" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-21" value="Batch Close" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="295" width="70" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-22" value="Permission control" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="325" width="90" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-23" value="etc..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="720" y="325" width="70" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-24" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2E6;strokeColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="370" width="250" height="200" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-25" value="MPoC-SDK" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="373" width="250" height="22" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-26" value="Device Attest" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="398" width="250" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-27" value="Threat Collect" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="420" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-28" value="Debug Check" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="705" y="420" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-29" value="Root Check" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="453" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-30" value="Health Check" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="705" y="453" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-31" value="PIN-PAD management" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="485" width="250" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-32" value="PIN Encryption" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="507" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-33" value="DUKPT Engine" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="705" y="507" width="85" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-34" value="PIN-PAD" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="570" y="540" width="85" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-35" value="WhiteBox Engine" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="705" y="540" width="85" height="25" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-36" value="Android OS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4D4D4D;strokeColor=#333333;fontSize=12;fontColor=#FFFFFF;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="555" y="585" width="250" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-37" value="" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#FF6000;strokeWidth=2;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="470" y="460" as="sourcePoint"/>
+                        <mxPoint x="555" y="460" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-38" value="USB/UART" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="480" y="465" width="60" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-39" value="安全加密通道" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="475" y="440" width="70" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-40" value="● 鉴证数据" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#CC0000;" parent="1" vertex="1">
+                    <mxGeometry x="890" y="416" width="70" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-41" value="● 交易数据" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#CC0000;" parent="1" vertex="1">
+                    <mxGeometry x="890" y="310" width="70" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-42" value="安全通道" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=10;fontColor=#FF6000;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="940" y="336" width="60" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-43" value="" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#FF6000;strokeWidth=2;entryX=0;entryY=0.75;entryDx=0;entryDy=0;exitX=1;exitY=0.38;exitDx=0;exitDy=0;exitPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="805" y="432.5" as="sourcePoint"/>
+                        <mxPoint x="1080" y="431.5" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-44" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#999999;strokeWidth=1;dashed=1;" parent="1" vertex="1">
+                    <mxGeometry x="1060" y="180" width="430" height="380" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-47" value="Nexus" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="230" width="380" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-48" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2E6;strokeColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="280" width="380" height="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-49" value="SUNBAY Cloud Services" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="1080" y="200" width="160" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-50" value="Device management" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="310" width="130" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-51" value="Threat Detection" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="333" width="85" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-52" value="Health transfer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1185" y="333" width="85" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-53" value="Device Security Score" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="373" width="85" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-54" value="Device register/approve" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1185" y="373" width="85" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-55" value="Audit log record/export" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="418" width="180" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-56" value="Attest transaction" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1290" y="310" width="110" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-57" value="Attest transaction token" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1290" y="333" width="80" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-58" value="Attest transaction record" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1375" y="333" width="80" height="35" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-59" value="Security Score check" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1290" y="378" width="80" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-60" value="Health monitoring" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1375" y="378" width="80" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-61" value="DUKPT/WhiteBox Key management" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF6000;fontSize=8;" parent="1" vertex="1">
+                    <mxGeometry x="1290" y="418" width="165" height="28" as="geometry"/>
+                </mxCell>
+                <mxCell id="api-note" value="API: MPoC/api (Backend)&#xa;/RKI/api/v1 (HSM)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=9;fontColor=#FF6000;" parent="1" vertex="1">
+                    <mxGeometry x="1090" y="455" width="180" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-62" value="Cloud HSM" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="1220" y="600" width="130" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-63" value="" style="endArrow=classic;html=1;strokeColor=#FF6000;strokeWidth=2;dashed=1;entryX=0.462;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" target="VvhWDl4fsIflBieCSh2V-62" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="1280" y="500" as="sourcePoint"/>
+                        <mxPoint x="1280" y="545" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="VvhWDl4fsIflBieCSh2V-68" value="" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#FF6000;strokeWidth=2;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0;exitDx=0;exitDy=0;edgeStyle=elbowEdgeStyle;" parent="1" source="VvhWDl4fsIflBieCSh2V-26" target="VvhWDl4fsIflBieCSh2V-47" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="870" y="460" as="sourcePoint"/>
+                        <mxPoint x="970" y="460" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

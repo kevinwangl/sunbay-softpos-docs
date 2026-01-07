@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-12-31T13:48:00.000Z" agent="Kiro" version="22.1.0">
+  <diagram id="system-comm-flow" name="System Communication Flow">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- Title -->
+        <mxCell id="title" value="SUNBAY MPoC 系统通信关系图 (v2.8)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#FF6000;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="800" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="subtitle" value="基于 MPOC_SDK_API_GUIDE.md 的完整系统架构与通信流程" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=14;fontStyle=2;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="450" y="65" width="700" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- Client Side -->
+        <mxCell id="client-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="50" y="120" width="400" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="client-title" value="客户端 (Client Side)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#1976D2;" vertex="1" parent="1">
+          <mxGeometry x="150" y="135" width="200" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="app" value="📱 Android App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="170" width="150" height="50" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="sdk" value="🛡️ MPoC SDK&#xa;(AAR Library)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;strokeWidth=2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="170" width="150" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- SDK Internal Modules -->
+        <mxCell id="sdk-modules-title" value="SDK 内部模块:" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=12;fontStyle=1;fontColor=#E65100;" vertex="1" parent="1">
+          <mxGeometry x="70" y="240" width="100" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="device-mgr" value="DeviceManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="265" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="cert-mgr" value="CertManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#E65100;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="160" y="265" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="key-mgr" value="KeyManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="250" y="265" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="crypto-engine" value="CryptoEngine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="265" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="token-mgr" value="TokenManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="305" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="whitebox-engine" value="WhiteBoxEngine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="160" y="305" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="backend-api" value="BackendApi" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFCCBC;strokeColor=#BF360C;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="250" y="305" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="security-checker" value="SecurityChecker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1976D2;strokeWidth=1;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="340" y="305" width="80" height="30" as="geometry"/>
+        </mxCell>
+        
+        <!-- Server Side -->
+        <mxCell id="server-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="500" y="120" width="400" height="300" as="geometry"/>
+        </mxCell>
+        <mxCell id="server-title" value="服务端 (Server Side)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="600" y="135" width="200" height="30" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="backend" value="🖥️ A/M-Backend" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#388E3C;strokeWidth=2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="170" width="150" height="50" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="posp" value="🏦 SUNBAY POSP" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;strokeWidth=2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="170" width="150" height="50" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="hsm" value="🔐 RKI CloudHSM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#FFA000;strokeWidth=2;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="520" y="240" width="150" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- External -->
+        <mxCell id="external-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=3;" vertex="1" parent="1">
+          <mxGeometry x="950" y="120" width="200" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="external-title" value="外部系统 (External)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=16;fontStyle=1;fontColor=#7B1FA2;" vertex="1" parent="1">
+          <mxGeometry x="970" y="135" width="160" height="25" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="processor" value="💳 Processor&#xa;TSYS/Fiserv/Elavon" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="970" y="170" width="160" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- Communication Arrows -->
+        <!-- App to SDK -->
+        <mxCell id="arrow-app-sdk" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#E65100;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="195" as="sourcePoint"/>
+            <mxPoint x="270" y="195" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-app-sdk" value="函数调用" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#E65100;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="225" y="175" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- SDK to Backend -->
+        <mxCell id="arrow-sdk-backend" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#388E3C;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="420" y="195" as="sourcePoint"/>
+            <mxPoint x="520" y="195" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-sdk-backend" value="REST API" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#388E3C;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="175" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- SDK to HSM (DUKPT) -->
+        <mxCell id="arrow-sdk-hsm" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FFA000;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="380" y="220" as="sourcePoint"/>
+            <mxPoint x="520" y="265" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-sdk-hsm" value="DUKPT密钥下载" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="420" y="235" width="80" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Backend to HSM -->
+        <mxCell id="arrow-backend-hsm" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FFA000;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="595" y="220" as="sourcePoint"/>
+            <mxPoint x="595" y="240" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-backend-hsm" value="CA签发" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="605" y="225" width="50" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- Backend WebSocket to SDK -->
+        <mxCell id="arrow-backend-sdk-ws" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#9C27B0;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="210" as="sourcePoint"/>
+            <mxPoint x="420" y="210" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-backend-sdk-ws" value="WebSocket推送" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#9C27B0;" vertex="1" parent="1">
+          <mxGeometry x="440" y="215" width="80" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- App to POSP -->
+        <mxCell id="arrow-app-posp" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#C2185B;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="220" y="195" as="sourcePoint"/>
+            <mxPoint x="720" y="195" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-app-posp" value="交易提交" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#C2185B;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="450" y="155" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- POSP to Backend -->
+        <mxCell id="arrow-posp-backend" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#795548;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="720" y="210" as="sourcePoint"/>
+            <mxPoint x="670" y="210" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-posp-backend" value="Token验证" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#795548;" vertex="1" parent="1">
+          <mxGeometry x="675" y="215" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- POSP to HSM -->
+        <mxCell id="arrow-posp-hsm" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#FFA000;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="720" y="220" as="sourcePoint"/>
+            <mxPoint x="670" y="265" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-posp-hsm" value="PIN转加密" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=9;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="680" y="235" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- POSP to Processor -->
+        <mxCell id="arrow-posp-processor" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#7B1FA2;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="870" y="195" as="sourcePoint"/>
+            <mxPoint x="970" y="195" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="label-posp-processor" value="交易路由" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontColor=#7B1FA2;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="175" width="60" height="15" as="geometry"/>
+        </mxCell>
+        
+        <!-- API Endpoints Section -->
+        <mxCell id="api-section-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#9E9E9E;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="450" width="1100" height="200" as="geometry"/>
+        </mxCell>
+        <mxCell id="api-section-title" value="API 端点总览 (API Endpoints Overview)" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=18;fontStyle=1;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="450" y="465" width="400" height="25" as="geometry"/>
+        </mxCell>
+        
+        <!-- SDK to Backend APIs -->
+        <mxCell id="sdk-backend-apis-title" value="MPoC SDK → A/M-Backend" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#388E3C;" vertex="1" parent="1">
+          <mxGeometry x="70" y="500" width="200" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="sdk-backend-apis" value="• POST MPoC/api/devices/register (设备注册)&#xa;• POST MPoC/api/certificates/sign (CSR签发)&#xa;• POST MPoC/api/keys/confirm (密钥下载确认)&#xa;• POST MPoC/api/keys/ecc/exchange (ECC密钥交换)&#xa;• POST MPoC/api/threats/report (威胁上报)&#xa;• POST MPoC/api/transactions/attest (交易鉴证)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="70" y="525" width="350" height="90" as="geometry"/>
+        </mxCell>
+        
+        <!-- SDK to HSM APIs -->
+        <mxCell id="sdk-hsm-apis-title" value="MPoC SDK → RKI CloudHSM" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#FFA000;" vertex="1" parent="1">
+          <mxGeometry x="450" y="500" width="250" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="sdk-hsm-apis" value="• POST /RKI/api/v1/keys/download (DUKPT密钥下载)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="525" width="300" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- App to POSP APIs -->
+        <mxCell id="app-posp-apis-title" value="Android App → SUNBAY POSP" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#C2185B;" vertex="1" parent="1">
+          <mxGeometry x="450" y="555" width="250" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="app-posp-apis" value="• POST /POSP/api/transactions (交易提交)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="450" y="580" width="300" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- POSP to Backend APIs -->
+        <mxCell id="posp-backend-apis-title" value="SUNBAY POSP → A/M-Backend" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#795548;" vertex="1" parent="1">
+          <mxGeometry x="780" y="500" width="250" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="posp-backend-apis" value="• POST MPoC/api/tokens/verify (Token验证)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="780" y="525" width="300" height="20" as="geometry"/>
+        </mxCell>
+        
+        <!-- WebSocket Notifications -->
+        <mxCell id="websocket-title" value="A/M-Backend → MPoC SDK (WebSocket)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#9C27B0;" vertex="1" parent="1">
+          <mxGeometry x="780" y="555" width="300" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="websocket-apis" value="• KEY_DOWNLOAD_REQUIRED (密钥下载通知)&#xa;• CERT_RENEWAL_REQUIRED (证书续期通知)&#xa;• THREAT_ALERT (威胁警报)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="780" y="580" width="300" height="50" as="geometry"/>
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#BDBDBD;strokeWidth=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="680" width="1100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="legend-title" value="图例 (Legend)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=14;fontStyle=1;fontColor=#333;" vertex="1" parent="1">
+          <mxGeometry x="70" y="690" width="100" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-solid" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#333;strokeWidth=3;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="70" y="720" as="sourcePoint"/>
+            <mxPoint x="120" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-solid-text" value="主要通信路径" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="130" y="710" width="80" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-dashed" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#333;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="720" as="sourcePoint"/>
+            <mxPoint x="300" y="720" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-dashed-text" value="直连/推送通信" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="310" y="710" width="80" height="20" as="geometry"/>
+        </mxCell>
+        
+        <mxCell id="legend-note" value="说明: SDK通过REST API与A/M-Backend通信，通过WebSocket接收实时通知；App直接提交交易到POSP；POSP验证Token并路由到Processor" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=10;fontStyle=2;fontColor=#666;" vertex="1" parent="1">
+          <mxGeometry x="70" y="740" width="1000" height="15" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
