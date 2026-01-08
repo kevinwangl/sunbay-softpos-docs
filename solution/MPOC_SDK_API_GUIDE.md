@@ -56,12 +56,12 @@ implementation 'com.sunbay:mpoc-sdk:1.0.0'
 |------|------|------|
 | 开发环境 | `http://localhost:8080` | 本地开发测试 |
 | 生产环境 | `http://softpos.sunbay.dev` | A/M-Backend 生产部署 |
-| POSP | `https://<posp-host>` | 交易处理 (App 直接提交) |
+| POSP | `https://<posp-host>` | 交易处理 (A&M Backend 内部转发) |
 | RKI HSM | `https://<rki-hsm-host>` | 密钥管理 (DUKPT 模式) |
 
 **API Base Path**: 
 - A/M-Backend: `MPoC/api`
-- POSP: `/POSP/api`
+- POSP: `/POSP/api` (仅供 A&M Backend 内部调用)
 
 ---
 
@@ -93,9 +93,10 @@ flowchart TB
     Backend -->|CA 签发| HSM
     
     SDK -->|"④ 交易鉴证 Token"| Backend
-    App -->|"⑤ 交易提交<br/>(加密PIN)"| POSP
-    POSP -->|"⑥ PIN 转加密"| HSM
-    POSP -->|"⑦ 交易路由"| Processor
+    App -->|"⑤ 交易提交<br/>(加密PIN)"| Backend
+    Backend -->|"⑥ 转发交易"| POSP
+    POSP -->|"⑦ PIN 转加密"| HSM
+    POSP -->|"⑧ 交易路由"| Processor
     
     style App fill:#e3f2fd,stroke:#1976d2
     style SDK fill:#fff8e1,stroke:#e65100
@@ -110,9 +111,10 @@ flowchart TB
 2. **② 初始化**: SDK 完成设备注册、证书签发、密钥初始化
 3. **③ 密钥下载**: DUKPT 模式下 SDK 直连 HSM 下载密钥
 4. **④ 交易鉴证**: 交易前 SDK 向 Backend 获取 Transaction Token
-5. **⑤ 交易提交**: App 携带加密 PIN Block 提交到 POSP
-6. **⑥ PIN 转加密**: POSP 在 HSM 内完成 PIN 转加密
-7. **⑦ 交易路由**: POSP 将交易发送到 Processor
+5. **⑤ 交易提交**: App 携带加密 PIN Block 提交到 A&M Backend
+6. **⑥ 转发交易**: A&M Backend 转发交易到 POSP
+7. **⑦ PIN 转加密**: POSP 在 HSM 内完成 PIN 转加密
+8. **⑧ 交易路由**: POSP 将交易发送到 Processor
 
 ### 2.2 API 端点总览
 
@@ -168,15 +170,11 @@ flowchart TB
 |-----|------|------|------|
 | 交易密钥协商 | `/POSP/api/keys/transaction/exchange` | POST | WBC 模式每笔交易密钥协商 |
 
-#### 2.2.6 Android App → SUNBAY POSP
+#### 2.2.6 Android App → A&M Backend
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
-| 交易提交 | `/POSP/api/transactions` | POST | App 直接提交交易到 POSP |
-
-| API | 端点 | 方法 | 说明 |
-|-----|------|------|------|
-| 交易提交 | `/POSP/api/transactions` | POST | App 直接提交交易到 POSP |
+| 交易提交 | `MPoC/api/transactions/submit` | POST | App 通过 A&M Backend 提交交易 |
 
 ### 2.3 HTTPS 推送通知机制
 
@@ -434,6 +432,38 @@ SDK 根据设备硬件能力自动检测 TEE 类型，不同类型决定后续�
 | **TEE** | ARM TrustZone 可信执行环境 | ⭐⭐ 高 | DUKPT 密钥下载 | TEE 安全区 |
 | **WhiteBox-WBC** | WBC 白盒加密（每交易协商） | ⭐⭐ 高 | WBC 安全通道 + 每交易 ECDH | WBC 保护内存 |
 | **WhiteBox-Simple** | 简化白盒加密（会话级协商） | ⭐ 中 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
+
+#### 4.2.1 TEE 类型检测算法
+
+SDK 按以下优先级顺序检测设备 TEE 类型：
+
+```java
+public enum TeeType {
+    SE,              // 最高优先级
+    TEE,             // 高优先级  
+    WHITEBOX_WBC,    // 中优先级
+    WHITEBOX_SIMPLE  // 最低优先级（fallback）
+}
+```
+
+**检测流程**:
+1. **SE 检测**: 检查是否存在独立安全芯片
+   - 检测方法: `hasSecureElement()` 
+   - 验证: SE 芯片可用性和 DUKPT 支持
+2. **TEE 检测**: 检查 ARM TrustZone 支持
+   - 检测方法: `hasTrustZone()`
+   - 验证: TEE 环境可用性和密钥存储能力
+3. **WhiteBox-WBC**: 检查 WBC 白盒加密支持
+   - 检测方法: `hasWhiteBoxWBC()`
+   - 验证: CommWBC 预置密钥完整性
+4. **WhiteBox-Simple**: 默认 fallback 模式
+   - 适用: 所有 Android 设备
+   - 要求: 最低 Android 7.0 (API 24)
+
+**Fallback 机制**:
+- 如果高优先级 TEE 类型检测失败，自动降级到下一级
+- 最终 fallback 到 WhiteBox-Simple（保证兼容性）
+- 检测结果缓存，避免重复检测
 
 > ⚠️ **重要**: 
 > - **WhiteBox-WBC**: 符合端云交互流程设计，使用 AuthCode + CommWBC + SCWBC 三层密钥架构
@@ -1060,6 +1090,36 @@ graph TB
 | SCWBC | 24 小时 | 建立设备与 A&M 的安全通道 | WBC 保护内存 |
 | 每交易密钥 | 单笔交易 | PIN/PAN 加密 | WBC 保护内存 (用后销毁) |
 
+#### 7.2.3.1 安全通道生命周期管理
+
+**SCWBC 安全通道生命周期**:
+
+1. **建立阶段** (Phase 3 完成后)
+   - SCWBC 安装成功，安全通道激活
+   - 状态: `CHANNEL_ACTIVE`
+   - 有效期: 24小时
+
+2. **使用阶段** (交易密钥协商)
+   - 每笔交易前通过 SCWBC 通道协商交易密钥
+   - 通道复用，无需重新建立
+   - 状态: `CHANNEL_IN_USE`
+
+3. **续期阶段** (接近过期时)
+   - 剩余时间 < 2小时时自动续期
+   - 后台静默更新 SCWBC
+   - 状态: `CHANNEL_RENEWING`
+
+4. **过期处理**
+   - SCWBC 过期后自动失效
+   - 状态: `CHANNEL_EXPIRED`
+   - 需重新执行 WBC 初始化流程
+
+**交易密钥生命周期**:
+- **生成**: 每笔交易前 ECDH 协商
+- **使用**: 仅用于当前交易的 PIN 加密
+- **销毁**: 交易完成后立即销毁 (5分钟内)
+- **状态跟踪**: `KEY_GENERATED` → `KEY_ACTIVE` → `KEY_DESTROYED`
+
 #### 7.2.4 API: WBC 初始化
 
 **端点**: `POST MPoC/api/wbc/initialize`
@@ -1104,32 +1164,41 @@ Content-Type: application/json
 
 #### 7.2.5 WBC 交易密钥协商
 
-每笔交易前，SDK 需要与 PSP 进行 ECDH 密钥协商：
+每笔交易前，SDK 通过 A&M Backend 与 POSP 进行 ECDH 密钥协商：
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant SDK as 🛡️ MPoC SDK
+    participant Backend as 🖥️ A&M-Backend
     participant PSP as 🏦 SUNBAY POSP
 
-    Note over SDK,PSP: 每笔交易前的密钥协商
+    Note over SDK,PSP: 每笔交易前的密钥协商 (通过 A&M 转发)
     
     rect rgb(255, 243, 224)
         Note over SDK: 生成临时密钥对
         SDK->>SDK: 生成临时 ECDH 密钥对 (DePub, DePriv)
-        SDK->>PSP: 发送临时公钥 DePub
-        Note right of SDK: 在 SCWBC 安全通道内传输
+        SDK->>Backend: 发送密钥协商请求 + DePub
+        Note right of SDK: 通过 SCWBC 安全通道传输
     end
     
     rect rgb(232, 245, 233)
+        Note over Backend: 转发到 POSP
+        Backend->>PSP: 转发密钥协商请求
+        Note right of Backend: 内部安全通道 (Backend ↔ POSP)
+        
         Note over PSP: HSM 内密钥协商
         PSP->>PSP: HSM 生成临时密钥对 (HoPub, HoPriv)
         PSP->>PSP: 计算共享密钥 SharedSecret = ECDH(HoPriv, DePub)
         PSP->>PSP: 派生交易密钥 TxKey = HKDF(SharedSecret, TxInfo)
-        PSP-->>SDK: 返回 HoPub + SharedInfo
+        PSP-->>Backend: 返回 HoPub + SharedInfo
     end
     
     rect rgb(227, 242, 253)
+        Note over Backend: 转发响应
+        Backend-->>SDK: 转发 POSP 响应
+        Note right of Backend: 通过 SCWBC 安全通道传输
+        
         Note over SDK: 派生交易密钥
         SDK->>SDK: 计算共享密钥 SharedSecret = ECDH(DePriv, HoPub)
         SDK->>SDK: 派生交易密钥 TxKey = HKDF(SharedSecret, TxInfo)
@@ -1141,11 +1210,11 @@ sequenceDiagram
 
 #### 7.2.6 API: 交易密钥协商
 
-**端点**: `POST https://<posp-host>/POSP/api/keys/transaction/exchange`
+**端点**: `POST MPoC/api/wbc/transaction-key-exchange`
 
 **负责模块**: WbcEngine
 
-> ⚠️ **重要**: 此API由SUNBAY POSP提供，不是A/M-Backend的API
+> ⚠️ **重要**: 此API由A&M Backend提供，内部转发到SUNBAY POSP
 
 **请求**:
 ```json
@@ -1156,6 +1225,20 @@ sequenceDiagram
   "curve": "P-256",
   "kdfInfo": "SUNBAY_PIN_ENCRYPTION_V1",
   "timestamp": "2024-12-30T10:00:00Z"
+}
+```
+
+**A&M Backend 内部转发到 POSP**:
+```json
+{
+  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
+  "transactionId": "txn-20241230-001",
+  "ephemeralPublicKey": "04a1b2c3d4e5f6...",
+  "curve": "P-256",
+  "kdfInfo": "SUNBAY_PIN_ENCRYPTION_V1",
+  "timestamp": "2024-12-30T10:00:00Z",
+  "merchantId": "merchant-001",
+  "terminalId": "term-001"
 }
 ```
 
@@ -1175,6 +1258,18 @@ sequenceDiagram
   },
   "message": "Transaction key exchange successful"
 }
+```
+
+**错误响应**:
+
+| 错误码 | 错误类型 | 说明 |
+|--------|---------|------|
+| 400 | `INVALID_DEVICE_ID` | 设备ID格式无效 |
+| 400 | `INVALID_PUBLIC_KEY` | 临时公钥格式无效 |
+| 403 | `DEVICE_NOT_AUTHORIZED` | 设备未授权进行密钥协商 |
+| 403 | `WBC_CHANNEL_NOT_READY` | WBC安全通道未建立 |
+| 422 | `KEY_EXCHANGE_FAILED` | ECDH密钥协商失败 |
+| 500 | `HSM_ERROR` | HSM内部错误 |
 ```
 
 ### 7.3 DH-ECC 密钥交换 (WhiteBox-Simple 模式)
@@ -1391,7 +1486,8 @@ sequenceDiagram
         SDK->>SDK: 显示安全 PIN 输入界面
         SDK->>SDK: CryptoEngine.encryptPin(pin, pan)
         Note right of SDK: DUKPT 或 WhiteBox 加密
-        SDK-->>App: encryptedPinBlock + ksn (DUKPT) 或 sessionId (WhiteBox)
+        SDK-->>App: encryptedPinBlock + keyIdentifier
+        Note right of SDK: keyIdentifier 根据 TEE 类型不同:<br/>DUKPT: ksn<br/>WhiteBox-WBC: transactionKeyId<br/>WhiteBox-Simple: sessionId
     end
     
     rect rgb(232, 245, 233)
@@ -1514,9 +1610,11 @@ Content-Type: application/json
 
 ### 8.4 App 提交交易到 POSP
 
-PIN 加密完成后，**Android App** (而非 SDK) 负责将交易提交到 SUNBAY POSP。
+PIN 加密完成后，**Android App** 通过 A&M Backend 将交易提交到 SUNBAY POSP。
 
-**POSP 端点**: `POST https://<posp-host>/POSP/api/transactions`
+**A&M Backend 端点**: `POST MPoC/api/transactions/submit`
+
+> ⚠️ **重要**: App 不直接调用 POSP API，而是通过 A&M Backend 转发
 
 **请求**:
 ```json
@@ -1530,11 +1628,32 @@ PIN 加密完成后，**Android App** (而非 SDK) 负责将交易提交到 SUNB
     "expiryDate": "1225",
     "encryptedPinBlock": "A1B2C3D4E5F6...",
     "pinBlockFormat": "ISO_9564_FORMAT_0",
-    "ksn": "FFFF9876543210E00001",
-    "encryptionMode": "DUKPT"
+    "transactionKeyId": "txkey-20241230-001",
+    "encryptionMode": "WBC_ECDH"
   },
   "merchantId": "merchant-001",
   "terminalId": "term-001"
+}
+```
+
+**A&M Backend 转发到 POSP**:
+```json
+{
+  "transactionId": "txn-20241230-001",
+  "transactionType": "PAYMENT",
+  "amount": 10000,
+  "currency": "USD",
+  "cardData": {
+    "pan": "4111111111111111",
+    "expiryDate": "1225",
+    "encryptedPinBlock": "A1B2C3D4E5F6...",
+    "pinBlockFormat": "ISO_9564_FORMAT_0",
+    "transactionKeyId": "txkey-20241230-001",
+    "encryptionMode": "WBC_ECDH"
+  },
+  "merchantId": "merchant-001",
+  "terminalId": "term-001",
+  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000"
 }
 ```
 
@@ -2596,12 +2715,12 @@ MpocSdk.requestTransactionToken(amount, transactionId, callback)
 
 // 4.2 PIN 加密 (SDK 负责)
 MpocSdk.encryptPin(pin, pan, callback)
-  → callback.onPinEncrypted(encryptedPinBlock, ksn/sessionId)
+  → callback.onPinEncrypted(encryptedPinBlock, keyIdentifier, keyType)
   → callback.onPinEncryptFailed(error)
 
-// 4.3 交易提交 (App 负责，直接调用 POSP API)
-// App 使用 HTTP Client 提交到 POSP:
-// POST https://<posp-host>/POSP/api/transactions
+// 4.3 交易提交 (App 负责，通过 A&M Backend 转发到 POSP)
+// App 使用 HTTP Client 提交到 A&M Backend:
+// POST MPoC/api/transactions/submit
 // Body: { encryptedPinBlock, transactionId, cardData, ... }
 
 // 生命周期管理
