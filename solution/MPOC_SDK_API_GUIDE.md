@@ -164,11 +164,11 @@ flowchart TB
 |-----|------|------|
 | CA 证书签发 | `/RKI/api/v1/ca/sign` | CSR 证书签发 |
 
-#### 2.2.5 MPoC SDK → SUNBAY POSP (WBC 模式)
+#### 2.2.5 A/M-Backend → SUNBAY POSP (内部转发)
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
-| 交易密钥协商 | `/POSP/api/keys/transaction/exchange` | POST | WBC 模式每笔交易密钥协商 |
+| 交易密钥协商 | `MPoC/api/wbc/transaction-key-exchange` | POST | A&M Backend 转发到 POSP 的密钥协商 |
 
 #### 2.2.6 Android App → A&M Backend
 
@@ -1491,9 +1491,10 @@ sequenceDiagram
     end
     
     rect rgb(232, 245, 233)
-        Note over App,Processor: 4.3 交易提交 (App 直接提交到 POSP)
-        App->>POSP: 提交交易请求
+        Note over App,Processor: 4.3 交易提交 (App 通过 A&M Backend 提交)
+        App->>Backend: 提交交易请求
         Note right of App: encryptedPinBlock + 交易数据
+        Backend->>POSP: 转发交易请求
         
         POSP->>POSP: PIN 转加密 (HSM)
         Note right of POSP: ECC/DUKPT → Processor ZPK
@@ -2755,7 +2756,7 @@ MpocSdk.forceKeyRefresh() → void
 MpocSdk.deregisterDevice(callback) → void
 ```
 
-> ⚠️ **重要**: MPoC SDK 只负责 Token 获取和 PIN 加密，**交易提交由 Android App 直接调用 POSP API**。
+> ⚠️ **重要**: MPoC SDK 只负责 Token 获取和 PIN 加密，**交易提交由 Android App 通过 A&M Backend 转发到 POSP**。
 
 ### C. 版本历史
 
@@ -2766,7 +2767,7 @@ MpocSdk.deregisterDevice(callback) → void
 | v1.2 | 2024-12-31 | 明确 TEE 类型与密钥模式对应关系 |
 | v2.0 | 2024-12-31 | 按 SDK 初始化调用顺序重构文档结构，明确模块职责划分 |
 | v2.1 | 2024-12-31 | 统一 securityInfo 字段；交易鉴证增加 transactionId；RKI API 前缀改为 /RKI/api/v1；补充 accessToken 使用说明和 API Header |
-| v2.2 | 2024-12-31 | 明确交易处理职责划分：SDK 负责 Token 获取和 PIN 加密，App 直接提交交易到 POSP |
+| v2.2 | 2024-12-31 | 明确交易处理职责划分：SDK 负责 Token 获取和 PIN 加密，App 通过 A&M Backend 提交交易 |
 | v2.3 | 2024-12-31 | A/M-Backend API 路径从 /MPoC/api/v1 修改为 MPoC/api |
 | v2.4 | 2024-12-31 | 移除 POSP Token 验证流程；通信关系图增加处理顺序号；密钥下载确认改为 DUKPT 密钥锁定 |
 | v2.5 | 2024-12-31 | 增加 SDK 版本管理 API |
