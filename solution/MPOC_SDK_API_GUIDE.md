@@ -1,6 +1,6 @@
 # SUNBAY MPoC SDK API 交互指南
 
-**版本**: v3.3  
+**版本**: v3.7  
 **日期**: 2026-01-08  
 **适用对象**: Android MPoC SDK 开发者
 
@@ -45,7 +45,7 @@ implementation 'com.sunbay:mpoc-sdk:1.0.0'
 
 | 特性 | 说明 |
 |------|------|
-| **PIN 加密** | 支持 DUKPT (SE/TEE) 和 WhiteBox DH-ECC 两种方案 |
+| **PIN 加密** | 支持 DUKPT (SE/TEE)、WhiteBox-WBC 和 WhiteBox-Simple 三种方案 |
 | **安全检测** | 实时检测 Root、模拟器、Hook 等威胁 |
 | **交易处理** | 支持消费、退款、撤销、预授权等交易类型 |
 | **合规认证** | 符合 PCI-DSS、PCI PIN 安全标准 |
@@ -89,7 +89,6 @@ flowchart TB
     App -->|"① 函数调用"| SDK
     SDK -->|"② REST API<br/>(注册/证书/密钥)"| Backend
     SDK -->|"③ DUKPT 密钥下载"| HSM
-    Backend -.->|HTTPS 推送| SDK
     Backend -->|CA 签发| HSM
     
     SDK -->|"④ 交易鉴证 Token"| Backend
@@ -146,118 +145,23 @@ flowchart TB
 | DUKPT密钥初始化 | DUKPT 密钥下载 | `/RKI/api/v1/keys/download` | POST |
 | DUKPT密钥锁定 | DUKPT 密钥锁定 | `/RKI/api/v1/keys/confirm` | POST |
 
-#### 2.2.3 A/M-Backend → MPoC SDK (HTTPS 推送)
-
-| 通知类型 | 触发时机 | 推送内容 |
-|---------|---------|---------|
-| `KEY_DOWNLOAD_REQUIRED` | 设备审批通过后 | HSM 访问凭证、下载授权 |
-| `CERT_RENEWAL_REQUIRED` | 证书即将过期 | 续期提醒、新证书参数 |
-| `KEY_ROTATION_REQUIRED` | 密钥轮换策略触发 | 轮换类型、新密钥参数 |
-| `POLICY_UPDATE` | 安全策略更新 | 新策略版本、配置差量 |
-| `THREAT_ALERT` | 检测到安全威胁 | 威胁级别、响应策略 |
-| `OFFLINE_MODE_EXPIRED` | 离线模式超时 | 重新联网要求 |
-| `DEVICE_SUSPENDED` | 设备被暂停 | 暂停原因、恢复条件 |
-
-#### 2.2.4 A/M-Backend → RKI CloudHSM (内部)
+#### 2.2.3 A/M-Backend → RKI CloudHSM (内部)
 
 | API | 端点 | 用途 |
 |-----|------|------|
 | CA 证书签发 | `/RKI/api/v1/ca/sign` | CSR 证书签发 |
 
-#### 2.2.5 A/M-Backend → SUNBAY POSP (内部转发)
+#### 2.2.4 A/M-Backend → SUNBAY POSP (内部转发)
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
 | 交易密钥协商 | `MPoC/api/wbc/transaction-key-exchange` | POST | A&M Backend 转发到 POSP 的密钥协商 |
 
-#### 2.2.6 Android App → A&M Backend
+#### 2.2.5 Android App → A&M Backend
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
 | 交易提交 | `MPoC/api/transactions/submit` | POST | App 通过 A&M Backend 提交交易 |
-
-### 2.3 HTTPS 推送通知机制
-
-A&M-Backend 通过 HTTPS 主动推送通知到 MPoC SDK，SDK 需要提供 HTTPS 回调端点接收通知。
-
-#### 2.3.1 推送通知格式
-
-**通用推送格式**:
-```json
-{
-  "notificationId": "notif-20241230-001",
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "notificationType": "KEY_DOWNLOAD_REQUIRED",
-  "priority": "HIGH",
-  "timestamp": "2024-12-30T10:00:00Z",
-  "expiresAt": "2024-12-30T10:30:00Z",
-  "payload": {
-    // 具体通知内容
-  },
-  "signature": "MEUCIQD..."
-}
-```
-
-#### 2.3.2 具体通知类型
-
-**KEY_DOWNLOAD_REQUIRED 通知**:
-```json
-{
-  "notificationType": "KEY_DOWNLOAD_REQUIRED",
-  "payload": {
-    "hsmEndpoint": "https://rki-hsm.sunbay.dev",
-    "accessToken": "hsm_access_token_here",
-    "keyType": "DUKPT",
-    "downloadDeadline": "2024-12-30T12:00:00Z"
-  }
-}
-```
-
-**POLICY_UPDATE 通知**:
-```json
-{
-  "notificationType": "POLICY_UPDATE",
-  "payload": {
-    "newPolicyVersion": "1.3.0",
-    "updateType": "INCREMENTAL",
-    "policyDelta": {
-      "securityLevel": "HIGH",
-      "maxOfflineHours": 24
-    },
-    "applyDeadline": "2024-12-30T12:00:00Z"
-  }
-}
-```
-
-**THREAT_ALERT 通知**:
-```json
-{
-  "notificationType": "THREAT_ALERT",
-  "payload": {
-    "threatLevel": "HIGH",
-    "threatType": "MALWARE_DETECTED",
-    "responseAction": "SUSPEND_TRANSACTIONS",
-    "message": "Malware detected in device environment"
-  }
-}
-```
-
-#### 2.3.3 SDK 推送通知处理
-
-SDK 需要实现 NotificationManager 模块处理推送通知：
-
-```java
-// SDK 内部推送通知处理接口
-public interface NotificationHandler {
-    void onKeyDownloadRequired(KeyDownloadNotification notification);
-    void onPolicyUpdate(PolicyUpdateNotification notification);
-    void onThreatAlert(ThreatAlertNotification notification);
-    void onCertRenewalRequired(CertRenewalNotification notification);
-    void onKeyRotationRequired(KeyRotationNotification notification);
-    void onOfflineModeExpired(OfflineModeNotification notification);
-    void onDeviceSuspended(DeviceSuspensionNotification notification);
-}
-```
 
 ---
 
@@ -297,7 +201,6 @@ graph TB
         
         subgraph "基础设施"
             BA[BackendApi<br/>HTTP/HTTPS通信]
-            NM[NotificationManager<br/>推送通知处理]
         end
     end
     
@@ -338,7 +241,6 @@ graph TB
 | **PolicyManager** | 安全策略管理、动态更新 | `updatePolicy()`, `checkCompliance()` | 全阶段 |
 | **OfflineManager** | 离线模式管理、数据同步 | `enableOfflineMode()`, `syncOfflineData()` | 全阶段 |
 | **BackendApi** | HTTP/TLS 1.3 通信、HTTPS 连接 | (内部模块) | 全阶段 |
-| **NotificationManager** | HTTPS 推送通知处理 | `handleNotification()` | 全阶段 |
 
 ---
 
@@ -417,9 +319,6 @@ stateDiagram-v2
     
     就绪 --> 交易中: 发起交易
     交易中 --> 就绪: 交易完成
-    
-    就绪 --> 会话过期: WhiteBox 会话超时
-    会话过期 --> 密钥初始化中: 重新交换
 ```
 
 ### 4.2 TEE 类型说明
@@ -431,7 +330,7 @@ SDK 根据设备硬件能力自动检测 TEE 类型，不同类型决定后续�
 | **SE** | Secure Element，独立安全芯片 | ⭐⭐⭐ 最高 | DUKPT 密钥下载 | SE 芯片内 |
 | **TEE** | ARM TrustZone 可信执行环境 | ⭐⭐ 高 | DUKPT 密钥下载 | TEE 安全区 |
 | **WhiteBox-WBC** | WBC 白盒加密（每交易协商） | ⭐⭐ 高 | WBC 安全通道 + 每交易 ECDH | WBC 保护内存 |
-| **WhiteBox-Simple** | 简化白盒加密（会话级协商） | ⭐ 中 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
+| **WhiteBox-Simple** | 简化白盒加密（每交易密钥协商） | ⭐⭐ 高 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
 
 #### 4.2.1 TEE 类型检测算法
 
@@ -502,7 +401,7 @@ sequenceDiagram
         rect rgb(255, 248, 225)
             Note over SDK,Backend: 1.2 设备注册
             SDK->>Backend: POST MPoC/api/devices/register
-            Backend-->>SDK: deviceId + accessToken + teeType
+            Backend-->>SDK: deviceId + teeType
         end
         
         rect rgb(232, 245, 233)
@@ -549,8 +448,6 @@ sequenceDiagram
   "code": 200,
   "data": {
     "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-    "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-    "tokenExpiresAt": "2024-12-31T10:00:00Z",
     "status": "PENDING_APPROVAL",
     "teeType": "TEE",
     "keyMode": "DUKPT"
@@ -564,8 +461,6 @@ sequenceDiagram
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `deviceId` | string | 设备唯一标识，后续所有 API 调用需携带 |
-| `accessToken` | string | JWT 访问令牌，后续 API 调用需在 Header 中携带 |
-| `tokenExpiresAt` | string | 令牌过期时间 (UTC) |
 | `status` | string | 设备状态: `PENDING_APPROVAL`, `APPROVED`, `REJECTED` |
 | `teeType` | string | TEE 类型: `SE`, `TEE`, `WhiteBox-WBC`, `WhiteBox-Simple` |
 | `keyMode` | string | 密钥模式: `DUKPT` (SE/TEE), `WBC` (WhiteBox-WBC), `DH-ECC` (WhiteBox-Simple) |
@@ -576,36 +471,7 @@ sequenceDiagram
 
 > 📌 SDK 根据 `teeType` 和 `keyMode` 决定阶段三的密钥初始化方式。
 
-### 5.3 accessToken 使用说明
-
-设备注册成功后返回的 `accessToken` 是 JWT 格式的访问令牌，**后续所有调用 A/M-Backend 的 API 都需要在 HTTP Header 中携带此令牌**：
-
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-```
-
-**Token 生命周期**:
-
-| 事件 | 处理方式 |
-|------|---------|
-| Token 即将过期 | SDK 自动刷新 (过期前 5 分钟) |
-| Token 已过期 | 返回 401 错误，SDK 需重新注册设备 |
-| 设备被禁用 | Token 立即失效，返回 403 错误 |
-
-**需要携带 accessToken 的 API**:
-
-| API | 端点 |
-|-----|------|
-| CSR 证书签发 | `POST MPoC/api/certificates/sign` |
-| ECC 密钥交换 | `POST MPoC/api/keys/ecc/exchange` |
-| 威胁上报 | `POST MPoC/api/threats/report` |
-| 交易鉴证 | `POST MPoC/api/transactions/attest` |
-
-> ⚠️ **注意**: 
-> - 直连 RKI HSM 的 DUKPT 密钥下载 API 不使用 accessToken，而是使用设备证书进行身份认证
-> - 设备注册前检测到安全威胁时，威胁上报 API 可不携带 accessToken（此时设备尚未注册）
-
-### 5.4 API: 威胁上报
+### 5.3 API: 威胁上报
 
 **端点**: `POST MPoC/api/threats/report`
 
@@ -613,7 +479,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 **请求 Header**:
 ```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  (设备注册后携带，注册前可省略)
 Content-Type: application/json
 ```
 
@@ -722,12 +587,6 @@ graph TB
 **端点**: `POST MPoC/api/certificates/sign`
 
 **负责模块**: CertManager
-
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
 
 **请求**:
 ```json
@@ -859,9 +718,6 @@ sequenceDiagram
 
     Note over App,HSM: 前置条件: 设备证书已签发
     
-    Backend->>SDK: HTTPS: KEY_DOWNLOAD_REQUIRED
-    Note right of Backend: 包含 HSM 访问凭证
-    
     rect rgb(227, 242, 253)
         Note over SDK: 准备下载请求
         SDK->>SDK: KeyManager.prepareDownloadRequest()
@@ -951,12 +807,6 @@ signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
 
 **负责模块**: KeyManager
 
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
-
 **请求**:
 ```json
 {
@@ -983,39 +833,48 @@ Content-Type: application/json
 
 #### 7.2.1 AuthCode 获取流程
 
-在WBC初始化之前，商户必须通过外部渠道获取AuthCode：
+在WBC初始化之前，需要通过SUNBAY平台完成设备绑定和AuthCode获取：
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Merchant as 👤 商户
-    participant Portal as 🌐 商户门户
+    participant Customer as 👤 机构客户
+    participant Platform as 🌐 SUNBAY平台
+    participant Merchant as 🏪 商户
+    participant Device as 📱 设备
     participant AM as 🖥️ A&M-Backend
-    participant SDK as 🛡️ MPoC SDK
 
-    Note over Merchant,SDK: 前置条件: 设备已注册且状态为 PENDING_APPROVAL
+    Note over Customer,AM: 前置条件: 设备已注册且状态为 PENDING_APPROVAL
     
-    Merchant->>Portal: 登录商户门户
-    Portal->>AM: 查询待绑定设备列表
-    AM-->>Portal: 返回设备列表
+    Customer->>Platform: 登录SUNBAY平台
+    Platform->>Platform: 查询可用设备列表
     
-    Merchant->>Portal: 选择设备并申请绑定
-    Portal->>AM: 提交设备绑定申请
-    AM->>AM: 内部审批流程
+    Customer->>Platform: 选择设备并绑定到指定商户
+    Platform->>AM: 提交设备-商户绑定请求
+    AM->>AM: 验证绑定权限和商户信息
     
-    alt 审批通过
-        AM->>AM: 生成 AuthCode
-        AM-->>Portal: 返回 AuthCode
-        Portal-->>Merchant: 显示 AuthCode (或邮件发送)
+    alt 绑定成功
+        AM->>AM: 生成设备专用 AuthCode
+        AM-->>Platform: 返回 AuthCode
+        Platform-->>Customer: 显示 AuthCode
         
-        Note over Merchant: 商户获得 AuthCode，可进行 WBC 初始化
-    else 审批拒绝
-        AM-->>Portal: 返回拒绝原因
-        Portal-->>Merchant: 显示拒绝信息
+        Customer->>Merchant: 提供 AuthCode 给商户
+        Note over Customer,Merchant: 通过安全渠道传递 AuthCode
+        
+        Merchant->>Device: 在设备上输入 AuthCode
+        Device->>Device: 启动 WBC 初始化流程
+        
+        Note over Device: 设备激活，可进行 WBC 初始化
+    else 绑定失败
+        AM-->>Platform: 返回失败原因
+        Platform-->>Customer: 显示错误信息
     end
 ```
 
-> ⚠️ **重要**: AuthCode 是一次性使用的授权凭证，用于建立商户与设备的绑定关系
+> ⚠️ **重要**: 
+> - AuthCode 是一次性使用的授权凭证，用于建立机构客户、商户与设备的三方绑定关系
+> - 机构客户负责在SUNBAY平台上管理设备分配
+> - 商户在设备上输入AuthCode完成最终激活
 
 #### 7.2.2 流程说明
 
@@ -1125,12 +984,6 @@ graph TB
 **端点**: `POST MPoC/api/wbc/initialize`
 
 **负责模块**: WbcEngine
-
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
 
 **请求**:
 ```json
@@ -1330,7 +1183,7 @@ graph TB
     
     subgraph "会话级密钥 (短期)"
         EphKey["🔑 临时 ECDH 密钥对<br/>(每次交换生成)"]
-        SessionKey["🔒 AES-256 会话密钥<br/>(HKDF 派生, 30分钟有效)"]
+        SessionKey["🔒 AES-256 会话密钥<br/>(HKDF 派生, 每次生成新密钥)"]
     end
     
     DevKey --> DevCert
@@ -1348,15 +1201,15 @@ graph TB
 | 设备密钥对 | 1 年 (随证书) | 身份认证、请求签名 | Android Keystore |
 | 设备证书 | 1 年 (可续期) | 身份验证、公钥分发 | Android Keystore |
 | 临时 ECDH 密钥对 | 单次使用 | 会话密钥协商 | 内存 (用后销毁) |
-| AES-256 会话密钥 | 30 分钟 | PIN 加密 | WhiteBox 保护内存 |
+| AES-256 会话密钥 | 每次交易生成新密钥 | PIN 加密 | WhiteBox 保护内存 |
 
 #### 7.3.3 会话密钥生命周期
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| **会话有效期** | 30 分钟 | 从密钥交换成功开始计算 |
-| **最大交易数** | 100 笔 | 单个会话内允许的最大交易数 |
-| **自动续期** | 支持 | 会话过期前 5 分钟自动发起新的密钥交换 |
+| **密钥生成方式** | 每次交易生成 | 每笔交易都生成新的会话密钥 |
+| **最大交易数** | 无限制 | 每笔交易使用独立密钥，无数量限制 |
+| **密钥复用** | 不支持 | 每个会话密钥仅用于单笔交易 |
 
 ```mermaid
 stateDiagram-v2
@@ -1366,18 +1219,13 @@ stateDiagram-v2
     
     需要续期 --> 证书有效: CSR 续期成功
     
-    证书有效 --> 密钥交换中: 发起 ECDH 交换
-    密钥交换中 --> 会话有效: 交换成功
-    密钥交换中 --> 证书有效: 交换失败 (重试)
+    证书有效 --> 就绪状态: 证书验证通过
     
-    会话有效 --> 会话有效: PIN 加密 (计数+1)
-    会话有效 --> 续期中: 剩余 < 5分钟 或 计数 > 90
-    会话有效 --> 已过期: 超时 或 计数 >= 100
+    就绪状态 --> 密钥交换中: 发起交易 (每次交易)
+    密钥交换中 --> PIN加密: 密钥交换成功
+    密钥交换中 --> 就绪状态: 交换失败 (重试)
     
-    续期中 --> 会话有效: 新会话建立
-    续期中 --> 已过期: 续期失败
-    
-    已过期 --> 密钥交换中: 重新交换
+    PIN加密 --> 就绪状态: 交易完成 (密钥销毁)
 ```
 
 #### 7.3.4 API: ECC 密钥交换
@@ -1385,12 +1233,6 @@ stateDiagram-v2
 **端点**: `POST MPoC/api/keys/ecc/exchange`
 
 **负责模块**: WhiteBoxEngine
-
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
 
 **请求**:
 ```json
@@ -1522,12 +1364,6 @@ sequenceDiagram
 **端点**: `POST MPoC/api/transactions/attest`
 
 **负责模块**: TokenManager, TransactionProcessor
-
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
 
 **请求**:
 ```json
@@ -1687,12 +1523,12 @@ flowchart TB
 |------|----------------|--------------|-----------------|
 | **适用 TEE 类型** | SE, TEE | WhiteBox-WBC | WhiteBox-Simple |
 | **密钥来源** | HSM 下载 | WBC 三层架构 | ECDH 协商 |
-| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每交易唯一 | 会话级 (30 分钟) |
-| **每笔交易密钥** | 自动派生唯一密钥 | 与 PSP ECDH 协商 | 复用会话密钥 |
-| **网络依赖** | 仅初始下载 | 每笔交易需协商 | 每 30 分钟需重新交换 |
-| **离线支持** | 支持 | 不支持 | 有限支持 (会话有效期内) |
-| **前向安全性** | 每笔交易独立 | 每笔交易独立 | 会话内共享 |
-| **安全级别** | ⭐⭐⭐ 最高 | ⭐⭐ 高 | ⭐ 中等 |
+| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每交易唯一 | 每交易生成新密钥 |
+| **每笔交易密钥** | 自动派生唯一密钥 | 与 PSP ECDH 协商 | 每次交易都生成新会话密钥 |
+| **网络依赖** | 仅初始下载 | 每笔交易需协商 | 每笔交易需重新交换 |
+| **离线支持** | 支持 | 不支持 | 不支持 (每笔交易需网络) |
+| **前向安全性** | 每笔交易独立 | 每笔交易独立 | 每笔交易独立 |
+| **安全级别** | ⭐⭐⭐ 最高 | ⭐⭐ 高 | ⭐⭐ 高 |
 | **商户绑定** | 无需 AuthCode | 需要 AuthCode | 无需 AuthCode |
 
 ### 9.2 DUKPT 模式详解
@@ -1823,12 +1659,6 @@ stateDiagram-v2
 **端点**: `POST MPoC/api/attestation/periodic`
 
 **负责模块**: LifecycleManager, PolicyManager
-
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
-Content-Type: application/json
-```
 
 **请求**:
 ```json
@@ -2020,9 +1850,11 @@ Content-Type: application/json
 
 #### 10.3.4 API: 会话密钥刷新
 
+> ⚠️ **注意**: 此 API 仅适用于 WhiteBox-WBC 模式。WhiteBox-Simple 模式每笔交易都生成新的会话密钥，无需刷新。
+
 **端点**: `POST MPoC/api/keys/session/refresh`
 
-**负责模块**: WhiteBoxEngine
+**负责模块**: WbcEngine (仅 WhiteBox-WBC 模式)
 
 **请求**:
 ```json
@@ -2042,8 +1874,8 @@ Content-Type: application/json
   "data": {
     "newSessionId": "sess-20241230-def456",
     "serverEphemeralPublicKey": "04f1e2d3c4b5a6...",
-    "expiresAt": "2024-12-30T10:30:00Z",
-    "maxTransactions": 100,
+    "expiresAt": "2024-12-31T10:00:00Z",
+    "maxTransactions": 50,
     "refreshId": "ref-20241230-001"
   },
   "message": "Session key refreshed successfully"
@@ -2429,12 +2261,6 @@ sequenceDiagram
 
 **负责模块**: VersionManager
 
-**请求 Header**:
-```http
-Authorization: Bearer eyJhbGciOiJIUzI1NiIs...  (设备注册后携带，首次可省略)
-Content-Type: application/json
-```
-
 **请求**:
 ```json
 {
@@ -2559,8 +2385,8 @@ Content-Type: application/json
 | 密钥交换 | `CERTIFICATE_EXPIRED` | 设备证书已过期 | 发起 CSR 续期 |
 | 密钥交换 | `SIGNATURE_INVALID` | 请求签名验证失败 | 检查设备私钥 |
 | 密钥轮换 | `ROTATION_FAILED` | 密钥轮换失败 | 继续使用旧密钥，增加监控 |
-| 交易处理 | `SESSION_EXPIRED` | 会话已过期 | 重新进行密钥交换 |
-| 交易处理 | `SESSION_LIMIT_EXCEEDED` | 会话交易数已达上限 | 重新进行密钥交换 |
+| 交易处理 | `KEY_EXCHANGE_FAILED` | 密钥交换失败 | 重新进行密钥交换 |
+| 交易处理 | `ENCRYPTION_FAILED` | PIN 加密失败 | 检查密钥状态，重新交换 |
 | 离线模式 | `OFFLINE_NOT_AUTHORIZED` | 离线模式未授权 | 等待网络恢复 |
 | 离线模式 | `OFFLINE_TIME_EXCEEDED` | 离线时间超限 | 强制联网认证 |
 | 离线模式 | `OFFLINE_SECURITY_BREACH` | 离线期间安全威胁 | 禁用离线功能 |
@@ -2778,3 +2604,7 @@ MpocSdk.deregisterDevice(callback) → void
 | v3.1 | 2026-01-08 | 增加两种WhiteBox模式支持：WhiteBox-WBC（三层密钥架构，每交易协商）和WhiteBox-Simple（会话级协商）；补充WBC相关API和流程描述 |
 | v3.2 | 2026-01-08 | 统一终端相关字段与端云交互流程文档：增加hwFingerprint、swAuthLevel、riskSummary等字段；修正API请求响应格式；完善术语表定义 |
 | v3.3 | 2026-01-08 | 修正逻辑错误：移除设备注册API中的authCode字段；增加AuthCode外部获取流程；修正WBC交易密钥协商API端点；完善流程描述的准确性 |
+| v3.4 | 2026-01-08 | 修正WhiteBox-Simple模式密钥层次结构：移除30分钟有效期限制，改为每次交易都生成新的会话密钥；更新相关API和错误处理；提升安全级别为⭐⭐高 |
+| v3.5 | 2026-01-08 | 移除HTTPS推送通知机制和accessToken认证机制：删除2.3节推送通知内容、移除所有API的Authorization头、简化设备注册响应、移除NotificationManager模块 |
+| v3.6 | 2026-01-08 | 修改AuthCode获取流程：更新7.2.1节为SUNBAY平台模式，机构客户在平台绑定设备到商户，商户在设备上输入AuthCode激活 |
+| v3.7 | 2026-01-08 | 修复文档错误和不一致性：更新版本号到v3.6、修正PIN加密方案描述、统一WhiteBox-Simple安全级别为⭐⭐高、移除通信图中HTTPS推送引用、更新WhiteBox-Simple描述 |
