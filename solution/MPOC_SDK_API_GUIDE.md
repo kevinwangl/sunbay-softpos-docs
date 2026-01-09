@@ -232,11 +232,11 @@ graph TB
 | **SecurityChecker** | Root/模拟器/Hook 检测、威胁上报 | `checkSecurity()`, `reportThreat()` | 阶段一 |
 | **CertManager** | ECC 密钥对生成、CSR 创建、证书存储 | `generateKeyPair()`, `submitCsr()` | 阶段二 |
 | **KeyManager** | DUKPT 密钥下载、KSN 管理 | `downloadKey()`, `confirmDownload()` | 阶段三 (SE/TEE) |
-| **WbcEngine** | WBC 安全通道建立、三层密钥管理 | `initializeWbc()`, `exchangeTransactionKey()` | 阶段三 (WhiteBox-WBC) |
+| **WbcEngine** | WBC 安全通道建立、三层密钥管理、密钥轮换 | `initializeWbc()`, `exchangeTransactionKey()`, `rotateWbcKey()` | 阶段三 (WhiteBox-WBC) |
 | **WhiteBoxEngine** | DH-ECC 密钥交换、会话密钥派生 | `initKeyExchange()`, `deriveSessionKey()` | 阶段三 (WhiteBox-Simple) |
 | **CryptoEngine** | PIN Block 生成、加密 (支持 SE/TEE/WhiteBox) | `encryptPin()`, `getTeeType()` | 阶段四 |
 | **TokenManager** | 交易令牌申请、有效期管理 | `requestToken()`, `validateToken()` | 阶段四 |
-| **TransactionProcessor** | 交易鉴证、Token 管理 | `attestTransaction()` | 阶段四 |
+| **TransactionProcessor** | 交易鉴证、交易数据封装 | `attestTransaction()`, `prepareTransaction()` | 阶段四 |
 | **LifecycleManager** | 设备生命周期管理、注销流程 | `deregisterDevice()`, `getDeviceStatus()` | 全阶段 |
 | **PolicyManager** | 安全策略管理、动态更新 | `updatePolicy()`, `checkCompliance()` | 全阶段 |
 | **OfflineManager** | 离线模式管理、数据同步 | `enableOfflineMode()`, `syncOfflineData()` | 全阶段 |
@@ -976,7 +976,7 @@ graph TB
 | SCWBC | 24 小时 | 建立设备与 A&M 的安全通道 | WBC 保护内存 |
 | **每笔交易密钥** | 单笔交易 | PIN/PAN 加密 | WBC 保护内存 (用后销毁) |
 
-#### 7.2.3.1 安全通道生命周期管理
+#### 7.2.3 安全通道生命周期管理
 
 **SCWBC 安全通道生命周期**:
 
@@ -1006,7 +1006,7 @@ graph TB
 - **销毁**: 交易完成后立即销毁 (5分钟内)
 - **状态跟踪**: `KEY_GENERATED` → `KEY_ACTIVE` → `KEY_DESTROYED`
 
-#### 7.2.3 API: WBC 初始化
+#### 7.2.4 API: WBC 初始化
 
 **端点**: `POST MPoC/api/wbc/initialize`
 
@@ -1041,7 +1041,7 @@ graph TB
 }
 ```
 
-#### 7.2.4 WBC 交易密钥协商
+#### 7.2.5 WBC 交易密钥协商
 
 每笔交易前，SDK 通过 A&M Backend 与 POSP 进行 ECDH 密钥协商：
 
@@ -1107,7 +1107,19 @@ sequenceDiagram
 }
 ```
 
+**请求参数说明**:
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `deviceId` | string | 是 | 设备唯一标识 |
+| `transactionId` | string | 是 | 交易流水号 (由 App 生成，全局唯一) |
+| `ephemeralPublicKey` | string | 是 | 临时 ECDH 公钥 (P-256 曲线，未压缩格式 04 + X + Y) |
+| `curve` | string | 是 | ECC 曲线: `P-256` |
+| `kdfInfo` | string | 是 | 密钥派生信息标签: `SUNBAY_PIN_ENCRYPTION_V1` |
+| `timestamp` | string | 是 | 请求时间戳 (UTC) |
+
 **A&M Backend 内部转发到 POSP**:
+
 ```json
 {
   "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
@@ -1122,6 +1134,7 @@ sequenceDiagram
 ```
 
 **响应**:
+
 ```json
 {
   "code": 200,
@@ -1139,17 +1152,31 @@ sequenceDiagram
 }
 ```
 
+**响应字段说明**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `serverEphemeralPublicKey` | string | 服务端临时 ECDH 公钥 |
+| `transactionKeyId` | string | 交易密钥标识符，用于后续 PIN 加密 |
+| `kdfParams.algorithm` | string | 密钥派生算法: `HKDF-SHA256` |
+| `kdfParams.info` | string | 密钥派生信息 (与请求一致) |
+| `kdfParams.keyLength` | number | 密钥长度: 256 位 |
+| `expiresAt` | string | 交易密钥过期时间 (UTC)，默认 5 分钟 |
+
 **错误响应**:
 
 | 错误码 | 错误类型 | 说明 |
 |--------|---------|------|
 | 400 | `INVALID_DEVICE_ID` | 设备ID格式无效 |
 | 400 | `INVALID_PUBLIC_KEY` | 临时公钥格式无效 |
+| 400 | `INVALID_CURVE` | 不支持的 ECC 曲线 |
 | 403 | `DEVICE_NOT_AUTHORIZED` | 设备未授权进行密钥协商 |
 | 403 | `WBC_CHANNEL_NOT_READY` | WBC安全通道未建立 |
+| 403 | `WBC_CHANNEL_EXPIRED` | WBC安全通道已过期，需重新初始化 |
 | 422 | `KEY_EXCHANGE_FAILED` | ECDH密钥协商失败 |
+| 422 | `TRANSACTION_NOT_FOUND` | 交易流水号不存在 |
 | 500 | `HSM_ERROR` | HSM内部错误 |
-```
+| 500 | `POSP_ERROR` | POSP处理错误 |
 
 ### 7.3 DH-ECC 密钥交换 (WhiteBox-Simple 模式)
 
@@ -1389,7 +1416,7 @@ sequenceDiagram
 
 **端点**: `POST MPoC/api/transactions/attest`
 
-**负责模块**: TokenManager, TransactionProcessor
+**负责模块**: TokenManager
 
 **请求**:
 ```json
@@ -1816,7 +1843,9 @@ stateDiagram-v2
 
 **端点**: `POST MPoC/api/keys/wbc/rotate`
 
-**负责模块**: KeyManager, WhiteBoxEngine
+**负责模块**: WbcEngine
+
+> ⚠️ **注意**: 此 API 仅适用于 WhiteBox-WBC 模式
 
 **请求**:
 ```json
@@ -1928,7 +1957,7 @@ stateDiagram-v2
 
 | 状态 | 说明 | 适用TEE类型 | 可执行操作 |
 |------|------|------------|-----------|
-| `REGISTERED` | 设备已注册，等待激活或直接进行证书签发 | 所有类型 | AuthCode激活(WBC)、证书签发(其他) |
+| `REGISTERED` | 设备已注册 | 所有类型 | AuthCode激活(仅WhiteBox-WBC)、证书签发(SE/TEE/WhiteBox-Simple直接进行) |
 | `ACTIVATED` | 设备已通过AuthCode激活，可进行证书签发 | WhiteBox-WBC | 证书签发、密钥初始化 |
 | `ACTIVE` | 设备完全可用，已完成证书签发和密钥初始化 | 所有类型 | 交易处理、密钥轮换 |
 | `SUSPENDED` | 设备被暂停，无法进行交易 | 所有类型 | 等待恢复 |
@@ -2035,7 +2064,7 @@ flowchart TB
 }
 ```
 
-#### 10.4.2 API: 设备注销
+#### 10.4.3 API: 设备注销
 
 **端点**: `POST MPoC/api/devices/deregister`
 
@@ -2450,7 +2479,7 @@ sequenceDiagram
 | 403 | `SDK_BLOCKED` | SDK 版本已被禁用 |
 | 404 | `APP_NOT_REGISTERED` | App 包名未注册 |
 
-### 10.4 版本管理策略
+### 12.4 版本管理策略
 
 | 策略 | 说明 |
 |------|------|
@@ -2600,7 +2629,6 @@ sequenceDiagram
 | EnSWAuthLevel | Encrypted Software Authorization Level | 加密的软件授权等级 |
 | hwFingerprint | Hardware Fingerprint | 硬件指纹，设备硬件特征的唯一标识 |
 | riskSummary | Risk Summary | 风险评估摘要，设备安全状态的综合评分 |
-| HW Fingerprint | Hardware Fingerprint | 硬件指纹，设备硬件特征标识 |
 | SCCERT | Secure Channel Certificate | 安全通道证书 |
 | SCPVK/SCPUK | Secure Channel Private/Public Key | 安全通道密钥对 |
 | SCCSR | Secure Channel Certificate Signing Request | 安全通道证书签名请求 |
