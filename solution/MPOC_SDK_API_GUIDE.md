@@ -245,6 +245,7 @@ graph TB
 ---
 
 ## 4. 初始化流程总览
+### 4.1 初始化状态机
 
 SDK 初始化按以下顺序执行，每个阶段必须成功完成后才能进入下一阶段：
 
@@ -296,51 +297,7 @@ flowchart TB
     style D2 fill:#fce4ec,stroke:#c2185b
     style D3 fill:#fce4ec,stroke:#c2185b
 ```
-    style B3 fill:#fff8e1,stroke:#e65100
-    style C1 fill:#e8f5e9,stroke:#388e3c
-    style C2 fill:#e8f5e9,stroke:#388e3c
-    style C3 fill:#e8f5e9,stroke:#388e3c
-    style C4 fill:#e8f5e9,stroke:#388e3c
-    style C5 fill:#e8f5e9,stroke:#388e3c
-    style C6 fill:#e8f5e9,stroke:#388e3c
-    style D1 fill:#fce4ec,stroke:#c2185b
-    style D2 fill:#fce4ec,stroke:#c2185b
-    style D3 fill:#fce4ec,stroke:#c2185b
-```
 
-### 4.1 初始化状态机
-
-```mermaid
-stateDiagram-v2
-    [*] --> 未初始化
-    未初始化 --> 安全检测中: initialize()
-    安全检测中 --> 安全检测失败: 检测到威胁
-    安全检测中 --> 设备注册中: 检测通过
-    
-    设备注册中 --> 注册失败: 网络错误/拒绝
-    设备注册中 --> 已注册: 注册成功(REGISTERED)
-    
-    已注册 --> AuthCode激活中: WhiteBox-WBC模式
-    已注册 --> 证书签发中: SE/TEE/WhiteBox-Simple模式
-    
-    AuthCode激活中 --> 激活失败: AuthCode验证失败
-    AuthCode激活中 --> 已激活: 激活成功(ACTIVATED)
-    
-    已激活 --> 证书签发中: 开始证书签发
-    
-    证书签发中 --> 签发失败: CSR错误/设备状态不符
-    证书签发中 --> 密钥初始化中: 证书获取成功
-    
-    密钥初始化中 --> 初始化失败: 密钥下载/交换失败
-    密钥初始化中 --> 设备可用: 密钥就绪(ACTIVE)
-    
-    设备可用 --> 交易中: 发起交易
-    交易中 --> 设备可用: 交易完成
-    
-    激活失败 --> 已注册: 重试激活
-    签发失败 --> 已注册: 重新开始流程
-    初始化失败 --> 已注册: 重新开始流程
-```
 
 ### 4.2 TEE 类型说明
 
