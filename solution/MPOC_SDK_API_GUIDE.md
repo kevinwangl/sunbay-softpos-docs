@@ -1,6 +1,6 @@
 # SUNBAY MPoC SDK API 交互指南
 
-**版本**: v3.7  
+**版本**: v3.8  
 **日期**: 2026-01-08  
 **适用对象**: Android MPoC SDK 开发者
 
@@ -252,7 +252,8 @@ SDK 初始化按以下顺序执行，每个阶段必须成功完成后才能进�
 flowchart TB
     subgraph "阶段一: 设备注册"
         A1[1.1 安全环境检测] --> A2[1.2 设备注册]
-        A2 --> A3[1.3 建立 HTTPS 连接]
+        A2 --> A3[1.3 AuthCode 激活 (仅 WBC)]
+        A3 --> A4[1.4 建立 HTTPS 连接]
     end
     
     subgraph "阶段二: 证书签发"
@@ -263,11 +264,14 @@ flowchart TB
     subgraph "阶段三: 密钥初始化"
         C1{TEE 类型?}
         C1 -->|SE/TEE| C2[3.1a DUKPT 密钥下载]
-        C1 -->|WhiteBox| C3[3.1b ECC 密钥交换]
-        C2 --> C4[3.2a 存储到 TEE/SE]
-        C3 --> C5[3.2b 派生会话密钥]
-        C4 --> C6[密钥就绪]
-        C5 --> C6
+        C1 -->|WhiteBox-WBC| C3[3.1b WBC 安全通道建立]
+        C1 -->|WhiteBox-Simple| C4[3.1c ECC 密钥交换]
+        C2 --> C5[3.2a 存储到 TEE/SE]
+        C3 --> C6[3.2b 建立 WBC 通道]
+        C4 --> C7[3.2c 派生会话密钥]
+        C5 --> C8[密钥就绪]
+        C6 --> C8
+        C7 --> C8
     end
     
     subgraph "阶段四: 交易处理"
@@ -275,9 +279,9 @@ flowchart TB
         D2 --> D3[4.3 交易提交]
     end
     
-    A3 --> B1
+    A4 --> B1
     B3 --> C1
-    C6 --> D1
+    C8 --> D1
     
     style A1 fill:#e3f2fd,stroke:#1976d2
     style A2 fill:#e3f2fd,stroke:#1976d2
@@ -448,7 +452,7 @@ sequenceDiagram
   "code": 200,
   "data": {
     "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-    "status": "PENDING_APPROVAL",
+    "status": "REGISTERED",
     "teeType": "TEE",
     "keyMode": "DUKPT"
   },
@@ -461,7 +465,7 @@ sequenceDiagram
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `deviceId` | string | 设备唯一标识，后续所有 API 调用需携带 |
-| `status` | string | 设备状态: `PENDING_APPROVAL`, `APPROVED`, `REJECTED` |
+| `status` | string | 设备状态: `REGISTERED`, `ACTIVATED`, `ACTIVE`, `SUSPENDED`, `DEREGISTERED` |
 | `teeType` | string | TEE 类型: `SE`, `TEE`, `WhiteBox-WBC`, `WhiteBox-Simple` |
 | `keyMode` | string | 密钥模式: `DUKPT` (SE/TEE), `WBC` (WhiteBox-WBC), `DH-ECC` (WhiteBox-Simple) |
 
@@ -471,7 +475,106 @@ sequenceDiagram
 
 > 📌 SDK 根据 `teeType` 和 `keyMode` 决定阶段三的密钥初始化方式。
 
-### 5.3 API: 威胁上报
+### 5.3 AuthCode 获取与设备激活 (WhiteBox-WBC 模式)
+
+对于 TEE 类型为 `WhiteBox-WBC` 的设备，需要在设备注册后通过 SUNBAY 平台完成设备绑定和 AuthCode 获取流程：
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Customer as 👤 机构客户
+    participant Platform as 🌐 SUNBAY平台
+    participant Merchant as 🏪 商户
+    participant Device as 📱 设备
+    participant AM as 🖥️ A&M-Backend
+
+    Note over Customer,AM: 前置条件: 设备已注册且状态为 REGISTERED
+    
+    Customer->>Platform: 登录SUNBAY平台
+    Platform->>Platform: 查询可用设备列表
+    
+    Customer->>Platform: 选择设备并绑定到指定商户
+    Platform->>AM: 提交设备-商户绑定请求
+    AM->>AM: 验证绑定权限和商户信息
+    
+    alt 绑定成功
+        AM->>AM: 生成设备专用 AuthCode
+        AM-->>Platform: 返回 AuthCode
+        Platform-->>Customer: 显示 AuthCode
+        
+        Customer->>Merchant: 提供 AuthCode 给商户
+        Note over Customer,Merchant: 通过安全渠道传递 AuthCode
+        
+        Merchant->>Device: 在设备上输入 AuthCode
+        Device->>AM: POST MPoC/api/devices/activate
+        AM->>AM: 验证 AuthCode 与设备绑定关系
+        
+        alt AuthCode 验证成功
+            AM->>AM: 更新设备状态为 ACTIVATED
+            AM-->>Device: 返回激活成功
+            Device->>Device: 设备进入可用状态
+            Note over Device: 设备已激活，可进行后续证书签发和密钥初始化
+        else AuthCode 验证失败
+            AM-->>Device: 返回激活失败
+            Device->>Device: 设备保持 REGISTERED 状态
+        end
+    else 绑定失败
+        AM-->>Platform: 返回失败原因
+        Platform-->>Customer: 显示错误信息
+    end
+```
+
+> ⚠️ **重要**: 
+> - AuthCode 是一次性使用的授权凭证，用于建立机构客户、商户与设备的三方绑定关系
+> - 机构客户负责在SUNBAY平台上管理设备分配
+> - 商户在设备上输入AuthCode完成设备激活，激活后设备才能进行证书签发和密钥初始化
+> - 只有 WhiteBox-WBC 模式的设备需要 AuthCode 激活流程
+
+#### 5.3.1 API: 设备激活
+
+**端点**: `POST MPoC/api/devices/activate`
+
+**负责模块**: DeviceManager
+
+**请求**:
+```json
+{
+  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
+  "authCode": "AUTH-1234-5678-9ABC-DEF0",
+  "merchantInfo": {
+    "merchantId": "merchant-001",
+    "terminalId": "terminal-001"
+  },
+  "timestamp": "2024-12-30T10:00:00Z"
+}
+```
+
+**响应**:
+```json
+{
+  "code": 200,
+  "data": {
+    "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
+    "status": "ACTIVATED",
+    "merchantId": "merchant-001",
+    "activatedAt": "2024-12-30T10:00:00Z",
+    "authCodeUsed": true
+  },
+  "message": "Device activated successfully"
+}
+```
+
+**错误响应**:
+
+| 错误码 | 错误类型 | 说明 |
+|--------|---------|------|
+| 400 | `INVALID_AUTH_CODE` | AuthCode 格式无效 |
+| 403 | `AUTH_CODE_EXPIRED` | AuthCode 已过期 |
+| 404 | `DEVICE_NOT_FOUND` | 设备不存在 |
+| 409 | `DEVICE_ALREADY_ACTIVATED` | 设备已激活 |
+| 422 | `AUTH_CODE_MISMATCH` | AuthCode 与设备不匹配 |
+
+### 5.4 API: 威胁上报
 
 **端点**: `POST MPoC/api/threats/report`
 
@@ -536,7 +639,7 @@ sequenceDiagram
     participant Backend as 🖥️ A/M-Backend
     participant HSM as 🔐 RKI CloudHSM
 
-    Note over App,HSM: 前置条件: 设备注册成功且审批通过
+    Note over App,HSM: 前置条件: 设备状态为 REGISTERED 或 ACTIVATED
     
     rect rgb(227, 242, 253)
         Note over SDK: 2.1 生成 ECC 密钥对
@@ -548,7 +651,7 @@ sequenceDiagram
     rect rgb(255, 248, 225)
         Note over SDK,HSM: 2.2 提交 CSR
         SDK->>Backend: POST MPoC/api/certificates/sign
-        Backend->>Backend: 验证设备状态
+        Backend->>Backend: 验证设备状态 (REGISTERED/ACTIVATED)
         Backend->>HSM: POST /RKI/api/v1/ca/sign
         HSM->>HSM: 验证 CSR → 签发证书
         HSM-->>Backend: certificate + chain
@@ -649,7 +752,7 @@ graph TB
 | 错误码 | 错误类型 | 说明 |
 |--------|---------|------|
 | 400 | `INVALID_CSR` | CSR 格式无效或签名验证失败 |
-| 403 | `DEVICE_NOT_APPROVED` | 设备未审批，无法签发证书 |
+| 403 | `DEVICE_NOT_READY` | 设备状态不允许签发证书 |
 | 409 | `CERTIFICATE_EXISTS` | 设备已有有效证书 |
 | 500 | `HSM_ERROR` | HSM 签发失败 |
 
@@ -680,10 +783,9 @@ flowchart TB
     end
     
     subgraph "WBC 模式 (WhiteBox-WBC)"
-        D --> D1[等待 AuthCode 输入]
-        D1 --> D2[CommWBC 加密 AuthCode]
-        D2 --> D3[获取 SCWBC 会话密钥]
-        D3 --> D4[建立 WBC 安全通道]
+        D --> D1[验证设备激活状态]
+        D1 --> D2[获取 SCWBC 会话密钥]
+        D2 --> D3[建立 WBC 安全通道]
     end
     
     subgraph "DH-ECC 模式 (WhiteBox-Simple)"
@@ -694,7 +796,7 @@ flowchart TB
     end
     
     C4 --> F[密钥就绪]
-    D4 --> F
+    D3 --> F
     E4 --> F
     
     style C fill:#e8f5e9,stroke:#388e3c
@@ -831,52 +933,7 @@ signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
 
 ### 7.2 WBC 安全通道建立 (WhiteBox-WBC 模式)
 
-#### 7.2.1 AuthCode 获取流程
-
-在WBC初始化之前，需要通过SUNBAY平台完成设备绑定和AuthCode获取：
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Customer as 👤 机构客户
-    participant Platform as 🌐 SUNBAY平台
-    participant Merchant as 🏪 商户
-    participant Device as 📱 设备
-    participant AM as 🖥️ A&M-Backend
-
-    Note over Customer,AM: 前置条件: 设备已注册且状态为 PENDING_APPROVAL
-    
-    Customer->>Platform: 登录SUNBAY平台
-    Platform->>Platform: 查询可用设备列表
-    
-    Customer->>Platform: 选择设备并绑定到指定商户
-    Platform->>AM: 提交设备-商户绑定请求
-    AM->>AM: 验证绑定权限和商户信息
-    
-    alt 绑定成功
-        AM->>AM: 生成设备专用 AuthCode
-        AM-->>Platform: 返回 AuthCode
-        Platform-->>Customer: 显示 AuthCode
-        
-        Customer->>Merchant: 提供 AuthCode 给商户
-        Note over Customer,Merchant: 通过安全渠道传递 AuthCode
-        
-        Merchant->>Device: 在设备上输入 AuthCode
-        Device->>Device: 启动 WBC 初始化流程
-        
-        Note over Device: 设备激活，可进行 WBC 初始化
-    else 绑定失败
-        AM-->>Platform: 返回失败原因
-        Platform-->>Customer: 显示错误信息
-    end
-```
-
-> ⚠️ **重要**: 
-> - AuthCode 是一次性使用的授权凭证，用于建立机构客户、商户与设备的三方绑定关系
-> - 机构客户负责在SUNBAY平台上管理设备分配
-> - 商户在设备上输入AuthCode完成最终激活
-
-#### 7.2.2 流程说明
+#### 7.2.1 流程说明
 
 适用于 TEE 类型为 `WhiteBox-WBC` 的设备。使用三层密钥架构：CommWBC（预置）→ SCWBC（会话级）→ 每交易密钥（与PSP协商）。
 
@@ -888,21 +945,18 @@ sequenceDiagram
     participant Backend as 🖥️ A&M-Backend
     participant PSP as 🏦 SUNBAY POSP
 
-    Note over App,PSP: 前置条件: 设备证书已签发，商户已通过外部渠道获得 AuthCode
-    
-    App->>SDK: 商户输入 AuthCode (通过门户/邮件获得)
+    Note over App,PSP: 前置条件: 设备证书已签发，设备已通过 AuthCode 完成激活
     
     rect rgb(255, 243, 224)
-        Note over SDK: Phase 1: AuthCode 提交 & SCWBC 获取
-        SDK->>SDK: 使用预置 CommWBC 加密 AuthCode
+        Note over SDK: Phase 1: WBC 初始化请求
         SDK->>SDK: 生成 InitialReq 报文
         SDK->>Backend: POST MPoC/api/wbc/initialize
-        Note right of SDK: CommWBC 保护的 AuthCode + 设备信息
+        Note right of SDK: 使用设备证书认证 + 设备信息
     end
     
     rect rgb(232, 245, 233)
-        Note over Backend: Phase 2: 验证 & SCWBC 下发
-        Backend->>Backend: 验证 AuthCode 与设备绑定关系
+        Note over Backend: Phase 2: SCWBC 下发
+        Backend->>Backend: 验证设备激活状态
         Backend->>Backend: 生成会话级 WBC 密钥 (SCWBC)
         Backend-->>SDK: 返回 SCWBC + SWAuthLevel
         Note right of Backend: 使用 CommWBC 加密下发
@@ -919,7 +973,7 @@ sequenceDiagram
     SDK-->>App: callback.onWbcChannelReady(swAuthLevel)
 ```
 
-#### 7.2.3 WBC 密钥层次结构
+#### 7.2.2 WBC 密钥层次结构
 
 ```mermaid
 graph TB
@@ -979,7 +1033,7 @@ graph TB
 - **销毁**: 交易完成后立即销毁 (5分钟内)
 - **状态跟踪**: `KEY_GENERATED` → `KEY_ACTIVE` → `KEY_DESTROYED`
 
-#### 7.2.4 API: WBC 初始化
+#### 7.2.3 API: WBC 初始化
 
 **端点**: `POST MPoC/api/wbc/initialize`
 
@@ -989,7 +1043,6 @@ graph TB
 ```json
 {
   "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "encryptedAuthCode": "base64_commwbc_encrypted_authcode",
   "encryptedDeviceFingerprint": "base64_commwbc_encrypted_df",
   "encryptionMethod": "CommWBC",
   "timestamp": "2024-12-30T10:00:00Z",
@@ -1015,7 +1068,7 @@ graph TB
 }
 ```
 
-#### 7.2.5 WBC 交易密钥协商
+#### 7.2.4 WBC 交易密钥协商
 
 每笔交易前，SDK 通过 A&M Backend 与 POSP 进行 ECDH 密钥协商：
 
@@ -1884,7 +1937,72 @@ stateDiagram-v2
 
 ### 10.4 设备状态管理
 
-#### 10.4.1 API: 设备状态查询
+#### 10.4.1 设备状态定义与转换
+
+**设备状态定义**：
+
+| 状态 | 说明 | 适用TEE类型 | 可执行操作 |
+|------|------|------------|-----------|
+| `REGISTERED` | 设备已注册，等待激活或直接进行证书签发 | 所有类型 | AuthCode激活(WBC)、证书签发(其他) |
+| `ACTIVATED` | 设备已通过AuthCode激活，可进行证书签发 | WhiteBox-WBC | 证书签发、密钥初始化 |
+| `ACTIVE` | 设备完全可用，已完成证书签发和密钥初始化 | 所有类型 | 交易处理、密钥轮换 |
+| `SUSPENDED` | 设备被暂停，无法进行交易 | 所有类型 | 等待恢复 |
+| `DEREGISTERED` | 设备已注销，无法使用 | 所有类型 | 无 |
+
+**状态转换流程**：
+
+```mermaid
+flowchart TB
+    Start[设备启动] --> Register[设备注册]
+    
+    Register --> Registered[状态: REGISTERED]
+    
+    Registered -->|SE/TEE/WhiteBox-Simple| CertReq[证书签发]
+    Registered -->|WhiteBox-WBC| AuthCode[AuthCode激活]
+    
+    AuthCode --> AuthSuccess{激活成功?}
+    AuthSuccess -->|是| Activated[状态: ACTIVATED]
+    AuthSuccess -->|否| Registered
+    
+    Activated --> CertReq2[证书签发]
+    CertReq --> CertSuccess{证书签发成功?}
+    CertReq2 --> CertSuccess
+    
+    CertSuccess -->|是| KeyInit[密钥初始化]
+    CertSuccess -->|否| Registered
+    
+    KeyInit --> KeySuccess{密钥初始化成功?}
+    KeySuccess -->|是| Active[状态: ACTIVE]
+    KeySuccess -->|否| Registered
+    
+    Active --> Transaction[交易处理]
+    
+    %% 异常状态转换
+    Active -->|安全威胁/管理操作| Suspended[状态: SUSPENDED]
+    Registered -->|安全威胁/管理操作| Suspended
+    Activated -->|安全威胁/管理操作| Suspended
+    
+    Suspended -->|恢复操作| Active
+    
+    Active -->|注销操作| Deregistered[状态: DEREGISTERED]
+    Suspended -->|注销操作| Deregistered
+    
+    style Registered fill:#fff3e0,stroke:#f57c00
+    style Activated fill:#e8f5e9,stroke:#388e3c
+    style Active fill:#e3f2fd,stroke:#1976d2
+    style Suspended fill:#ffebee,stroke:#d32f2f
+    style Deregistered fill:#f3e5f5,stroke:#7b1fa2
+```
+
+**不同TEE类型的状态流程差异**：
+
+| TEE类型 | 状态流程 | 说明 |
+|---------|---------|------|
+| SE/TEE | `REGISTERED` → `ACTIVE` | 直接进行证书签发和密钥初始化 |
+| WhiteBox-Simple | `REGISTERED` → `ACTIVE` | 直接进行证书签发和密钥初始化 |
+| WhiteBox-WBC | `REGISTERED` → `ACTIVATED` → `ACTIVE` | 需要先通过AuthCode激活 |
+
+#### 10.4.2 API: 设备状态查询
 
 **端点**: `GET MPoC/api/devices/status?deviceId={deviceId}`
 
@@ -2360,7 +2478,7 @@ sequenceDiagram
 
 ## 13. 错误处理
 
-### 11.1 通用错误码
+### 13.1 通用错误码
 
 | 错误码 | 说明 | 处理建议 |
 |--------|------|---------|
@@ -2374,13 +2492,13 @@ sequenceDiagram
 | `500` | 服务器内部错误 | 稍后重试 |
 | `503` | 服务不可用 | 稍后重试 |
 
-### 11.2 阶段相关错误
+### 13.2 阶段相关错误
 
 | 阶段 | 错误类型 | 说明 | SDK 处理 |
 |------|---------|------|---------|
 | 设备注册 | `DEVICE_REJECTED` | 设备被拒绝 | 提示用户联系管理员 |
 | 证书签发 | `INVALID_CSR` | CSR 格式无效 | 重新生成 CSR |
-| 证书签发 | `DEVICE_NOT_APPROVED` | 设备未审批 | 等待审批 |
+| 证书签发 | `DEVICE_NOT_READY` | 设备状态不允许签发证书 | 检查设备状态，完成前置步骤 |
 | 密钥下载 | `HSM_UNAVAILABLE` | HSM 不可用 | 稍后重试 |
 | 密钥交换 | `CERTIFICATE_EXPIRED` | 设备证书已过期 | 发起 CSR 续期 |
 | 密钥交换 | `SIGNATURE_INVALID` | 请求签名验证失败 | 检查设备私钥 |
@@ -2393,7 +2511,7 @@ sequenceDiagram
 | 生命周期 | `DEVICE_SUSPENDED` | 设备被暂停 | 联系管理员 |
 | 生命周期 | `POLICY_UPDATE_FAILED` | 策略更新失败 | 使用旧策略，稍后重试 |
 
-### 11.3 错误响应格式
+### 13.3 错误响应格式
 
 ```json
 {
@@ -2411,7 +2529,7 @@ sequenceDiagram
 }
 ```
 
-### 11.4 重试策略
+### 13.4 重试策略
 
 | 错误类型 | 重试策略 |
 |---------|---------|
@@ -2608,3 +2726,4 @@ MpocSdk.deregisterDevice(callback) → void
 | v3.5 | 2026-01-08 | 移除HTTPS推送通知机制和accessToken认证机制：删除2.3节推送通知内容、移除所有API的Authorization头、简化设备注册响应、移除NotificationManager模块 |
 | v3.6 | 2026-01-08 | 修改AuthCode获取流程：更新7.2.1节为SUNBAY平台模式，机构客户在平台绑定设备到商户，商户在设备上输入AuthCode激活 |
 | v3.7 | 2026-01-08 | 修复文档错误和不一致性：更新版本号到v3.6、修正PIN加密方案描述、统一WhiteBox-Simple安全级别为⭐⭐高、移除通信图中HTTPS推送引用、更新WhiteBox-Simple描述 |
+| v3.8 | 2026-01-09 | 重新梳理设备状态流程：统一设备状态定义(REGISTERED/ACTIVATED/ACTIVE/SUSPENDED/DEREGISTERED)、修复章节编号错误(13.1-13.4)、完善设备状态转换图、修正证书签发前置条件 |
