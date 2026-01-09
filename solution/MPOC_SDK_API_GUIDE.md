@@ -251,32 +251,32 @@ SDK 初始化按以下顺序执行，每个阶段必须成功完成后才能进�
 ```mermaid
 flowchart TB
     subgraph "阶段一: 设备注册"
-        A1[1.1 安全环境检测] --> A2[1.2 设备注册]
-        A2 --> A3[1.3 AuthCode 激活 (仅 WBC)]
-        A3 --> A4[1.4 建立 HTTPS 连接]
+        A1["1.1 安全环境检测"] --> A2["1.2 设备注册"]
+        A2 --> A3["1.3 AuthCode 激活 (仅 WBC)"]
+        A3 --> A4["1.4 建立 HTTPS 连接"]
     end
     
     subgraph "阶段二: 证书签发"
-        B1[2.1 生成 ECC 密钥对] --> B2[2.2 提交 CSR]
-        B2 --> B3[2.3 存储证书]
+        B1["2.1 生成 ECC 密钥对"] --> B2["2.2 提交 CSR"]
+        B2 --> B3["2.3 存储证书"]
     end
     
     subgraph "阶段三: 密钥初始化"
-        C1{TEE 类型?}
-        C1 -->|SE/TEE| C2[3.1a DUKPT 密钥下载]
-        C1 -->|WhiteBox-WBC| C3[3.1b WBC 安全通道建立]
-        C1 -->|WhiteBox-Simple| C4[3.1c ECC 密钥交换]
-        C2 --> C5[3.2a 存储到 TEE/SE]
-        C3 --> C6[3.2b 建立 WBC 通道]
-        C4 --> C7[3.2c 派生会话密钥]
-        C5 --> C8[密钥就绪]
+        C1{"TEE 类型?"}
+        C1 -->|SE/TEE| C2["3.1a DUKPT 密钥下载"]
+        C1 -->|WhiteBox-WBC| C3["3.1b WBC 安全通道建立"]
+        C1 -->|WhiteBox-Simple| C4["3.1c ECC 密钥交换"]
+        C2 --> C5["3.2a 存储到 TEE/SE"]
+        C3 --> C6["3.2b 建立 WBC 通道"]
+        C4 --> C7["3.2c 派生会话密钥"]
+        C5 --> C8["密钥就绪"]
         C6 --> C8
         C7 --> C8
     end
     
     subgraph "阶段四: 交易处理"
-        D1[4.1 交易鉴证] --> D2[4.2 PIN 加密]
-        D2 --> D3[4.3 交易提交]
+        D1["4.1 交易鉴证"] --> D2["4.2 PIN 加密"]
+        D2 --> D3["4.3 交易提交"]
     end
     
     A4 --> B1
@@ -288,6 +288,14 @@ flowchart TB
     style A3 fill:#e3f2fd,stroke:#1976d2
     style B1 fill:#fff8e1,stroke:#e65100
     style B2 fill:#fff8e1,stroke:#e65100
+    style B3 fill:#fff8e1,stroke:#e65100
+    style C2 fill:#e8f5e9,stroke:#388e3c
+    style C3 fill:#e8f5e9,stroke:#388e3c
+    style C4 fill:#e8f5e9,stroke:#388e3c
+    style D1 fill:#fce4ec,stroke:#c2185b
+    style D2 fill:#fce4ec,stroke:#c2185b
+    style D3 fill:#fce4ec,stroke:#c2185b
+```
     style B3 fill:#fff8e1,stroke:#e65100
     style C1 fill:#e8f5e9,stroke:#388e3c
     style C2 fill:#e8f5e9,stroke:#388e3c
