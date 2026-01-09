@@ -298,7 +298,6 @@ flowchart TB
     style D3 fill:#fce4ec,stroke:#c2185b
 ```
 
-
 ### 4.2 TEE 类型说明
 
 SDK 根据设备硬件能力自动检测 TEE 类型，不同类型决定后续密钥初始化方式：
