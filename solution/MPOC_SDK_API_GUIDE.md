@@ -1,7 +1,7 @@
 # SUNBAY MPoC SDK API 交互指南
 
 **版本**: v3.8  
-**日期**: 2026-01-08  
+**日期**: 2026-01-09  
 **适用对象**: Android MPoC SDK 开发者
 
 ---
@@ -55,12 +55,12 @@ implementation 'com.sunbay:mpoc-sdk:1.0.0'
 | 环境 | 地址 | 用途 |
 |------|------|------|
 | 开发环境 | `http://localhost:8080` | 本地开发测试 |
-| 生产环境 | `http://softpos.sunbay.dev` | A/M-Backend 生产部署 |
+| 生产环境 | `http://softpos.sunbay.dev` | A&M Backend 生产部署 |
 | POSP | `https://<posp-host>` | 交易处理 (A&M Backend 内部转发) |
 | RKI HSM | `https://<rki-hsm-host>` | 密钥管理 (DUKPT 模式) |
 
 **API Base Path**: 
-- A/M-Backend: `MPoC/api`
+- A&M Backend: `MPoC/api`
 - POSP: `/POSP/api` (仅供 A&M Backend 内部调用)
 
 ---
@@ -77,7 +77,7 @@ flowchart TB
     end
     
     subgraph "服务端"
-        Backend[🖥️ A/M-Backend]
+        Backend[🖥️ A&M Backend]
         POSP[🏦 SUNBAY POSP]
         HSM[🔐 RKI CloudHSM]
     end
@@ -117,7 +117,7 @@ flowchart TB
 
 ### 2.2 API 端点总览
 
-#### 2.2.1 MPoC SDK → A/M-Backend
+#### 2.2.1 MPoC SDK → A&M Backend
 
 | 阶段 | API | 端点 | 方法 |
 |------|-----|------|------|
@@ -145,13 +145,13 @@ flowchart TB
 | DUKPT密钥初始化 | DUKPT 密钥下载 | `/RKI/api/v1/keys/download` | POST |
 | DUKPT密钥锁定 | DUKPT 密钥锁定 | `/RKI/api/v1/keys/confirm` | POST |
 
-#### 2.2.3 A/M-Backend → RKI CloudHSM (内部)
+#### 2.2.3 A&M Backend → RKI CloudHSM (内部)
 
 | API | 端点 | 用途 |
 |-----|------|------|
 | CA 证书签发 | `/RKI/api/v1/ca/sign` | CSR 证书签发 |
 
-#### 2.2.4 A/M-Backend → SUNBAY POSP (内部转发)
+#### 2.2.4 A&M Backend → SUNBAY POSP (内部转发)
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
@@ -233,7 +233,7 @@ graph TB
 | **CertManager** | ECC 密钥对生成、CSR 创建、证书存储 | `generateKeyPair()`, `submitCsr()` | 阶段二 |
 | **KeyManager** | DUKPT 密钥下载、KSN 管理 | `downloadKey()`, `confirmDownload()` | 阶段三 (SE/TEE) |
 | **WbcEngine** | WBC 安全通道建立、三层密钥管理 | `initializeWbc()`, `exchangeTransactionKey()` | 阶段三 (WhiteBox-WBC) |
-| **WhiteBoxEngine** | DH-ECC 协商、会话密钥派生 | `initKeyExchange()`, `deriveSessionKey()` | 阶段三 (WhiteBox-Simple) |
+| **WhiteBoxEngine** | DH-ECC 密钥交换、会话密钥派生 | `initKeyExchange()`, `deriveSessionKey()` | 阶段三 (WhiteBox-Simple) |
 | **CryptoEngine** | PIN Block 生成、加密 (支持 SE/TEE/WhiteBox) | `encryptPin()`, `getTeeType()` | 阶段四 |
 | **TokenManager** | 交易令牌申请、有效期管理 | `requestToken()`, `validateToken()` | 阶段四 |
 | **TransactionProcessor** | 交易鉴证、Token 管理 | `attestTransaction()` | 阶段四 |
@@ -306,8 +306,8 @@ SDK 根据设备硬件能力自动检测 TEE 类型，不同类型决定后续�
 |--------------|---------|-------------|------------------|-----------------|
 | **SE** | Secure Element，独立安全芯片 | ⭐⭐⭐ 最高 | DUKPT 密钥下载 | SE 芯片内 |
 | **TEE** | ARM TrustZone 可信执行环境 | ⭐⭐ 高 | DUKPT 密钥下载 | TEE 安全区 |
-| **WhiteBox-WBC** | WBC 白盒加密（每交易协商） | ⭐⭐ 高 | WBC 安全通道 + 每交易 ECDH | WBC 保护内存 |
-| **WhiteBox-Simple** | 简化白盒加密（每交易密钥协商） | ⭐⭐ 高 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
+| **WhiteBox-WBC** | WBC 白盒加密（每笔交易协商） | ⭐⭐ 高 | WBC 安全通道 + 每笔交易 ECDH | WBC 保护内存 |
+| **WhiteBox-Simple** | 简化白盒加密（每笔交易生成新密钥） | ⭐⭐ 高 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
 
 #### 4.2.1 TEE 类型检测算法
 
@@ -359,7 +359,7 @@ sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
 
     App->>SDK: MpocSdk.initialize(config)
     
@@ -459,7 +459,7 @@ sequenceDiagram
     participant Platform as 🌐 SUNBAY平台
     participant Merchant as 🏪 商户
     participant Device as 📱 设备
-    participant AM as 🖥️ A&M-Backend
+    participant AM as 🖥️ A&M Backend
 
     Note over Customer,AM: 前置条件: 设备已注册且状态为 REGISTERED
     
@@ -609,10 +609,10 @@ sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
     participant HSM as 🔐 RKI CloudHSM
 
-    Note over App,HSM: 前置条件: 设备状态为 REGISTERED 或 ACTIVATED
+    Note over App,HSM: 前置条件: SE/TEE设备状态为REGISTERED，WhiteBox-WBC设备状态为ACTIVATED
     
     rect rgb(227, 242, 253)
         Note over SDK: 2.1 生成 ECC 密钥对
@@ -624,7 +624,7 @@ sequenceDiagram
     rect rgb(255, 248, 225)
         Note over SDK,HSM: 2.2 提交 CSR
         SDK->>Backend: POST MPoC/api/certificates/sign
-        Backend->>Backend: 验证设备状态 (REGISTERED/ACTIVATED)
+        Backend->>Backend: 验证设备状态 (SE/TEE:REGISTERED, WBC:ACTIVATED)
         Backend->>HSM: POST /RKI/api/v1/ca/sign
         HSM->>HSM: 验证 CSR → 签发证书
         HSM-->>Backend: certificate + chain
@@ -788,7 +788,7 @@ sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
     participant HSM as 🔐 RKI CloudHSM
 
     Note over App,HSM: 前置条件: 设备证书已签发
@@ -908,14 +908,14 @@ signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
 
 #### 7.2.1 流程说明
 
-适用于 TEE 类型为 `WhiteBox-WBC` 的设备。使用三层密钥架构：CommWBC（预置）→ SCWBC（会话级）→ 每交易密钥（与PSP协商）。
+适用于 TEE 类型为 `WhiteBox-WBC` 的设备。使用三层密钥架构：CommWBC（预置）→ SCWBC（会话级）→ 每笔交易密钥（与PSP协商）。
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A&M-Backend
+    participant Backend as 🖥️ A&M Backend
     participant PSP as 🏦 SUNBAY POSP
 
     Note over App,PSP: 前置条件: 设备证书已签发，设备已通过 AuthCode 完成激活
@@ -959,7 +959,7 @@ graph TB
     end
     
     subgraph "交易密钥层"
-        TxKey["🔒 每交易密钥<br/>(与 PSP ECDH 协商)<br/>每笔交易唯一"]
+        TxKey["🔒 每笔交易密钥<br/>(与 PSP ECDH 协商)<br/>每笔交易唯一"]
     end
     
     CommWBC -->|加密保护| SCWBC
@@ -974,7 +974,7 @@ graph TB
 |---------|---------|------|---------|
 | CommWBC | 永久 (预置) | 保护 AuthCode 和 SCWBC 传输 | WBC 保护内存 |
 | SCWBC | 24 小时 | 建立设备与 A&M 的安全通道 | WBC 保护内存 |
-| 每交易密钥 | 单笔交易 | PIN/PAN 加密 | WBC 保护内存 (用后销毁) |
+| **每笔交易密钥** | 单笔交易 | PIN/PAN 加密 | WBC 保护内存 (用后销毁) |
 
 #### 7.2.3.1 安全通道生命周期管理
 
@@ -1049,7 +1049,7 @@ graph TB
 sequenceDiagram
     autonumber
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A&M-Backend
+    participant Backend as 🖥️ A&M Backend
     participant PSP as 🏦 SUNBAY POSP
 
     Note over SDK,PSP: 每笔交易前的密钥协商 (通过 A&M 转发)
@@ -1162,7 +1162,7 @@ sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
 
     Note over App,Backend: 前置条件: 设备证书已签发
     
@@ -1227,13 +1227,13 @@ graph TB
 | 设备密钥对 | 1 年 (随证书) | 身份认证、请求签名 | Android Keystore |
 | 设备证书 | 1 年 (可续期) | 身份验证、公钥分发 | Android Keystore |
 | 临时 ECDH 密钥对 | 单次使用 | 会话密钥协商 | 内存 (用后销毁) |
-| AES-256 会话密钥 | 每次交易生成新密钥 | PIN 加密 | WhiteBox 保护内存 |
+| AES-256 会话密钥 | 每笔交易生成新密钥 | PIN 加密 | WhiteBox 保护内存 |
 
 #### 7.3.3 会话密钥生命周期
 
 | 参数 | 值 | 说明 |
 |------|-----|------|
-| **密钥生成方式** | 每次交易生成 | 每笔交易都生成新的会话密钥 |
+| **密钥生成方式** | 每笔交易生成 | 每笔交易都生成新的会话密钥 |
 | **最大交易数** | 无限制 | 每笔交易使用独立密钥，无数量限制 |
 | **密钥复用** | 不支持 | 每个会话密钥仅用于单笔交易 |
 
@@ -1247,7 +1247,7 @@ stateDiagram-v2
     
     证书有效 --> 就绪状态: 证书验证通过
     
-    就绪状态 --> 密钥交换中: 发起交易 (每次交易)
+    就绪状态 --> 密钥交换中: 发起交易 (每笔交易)
     密钥交换中 --> PIN加密: 密钥交换成功
     密钥交换中 --> 就绪状态: 交换失败 (重试)
     
@@ -1331,7 +1331,7 @@ sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
     participant POSP as 🏦 SUNBAY POSP
     participant Processor as 💳 Processor
 
@@ -1378,12 +1378,12 @@ sequenceDiagram
 
 | 组件 | 职责 | 说明 |
 |------|------|------|
-| **MPoC SDK** | 交易鉴证 Token 获取 | 调用 A/M-Backend 获取 transactionToken |
+| **MPoC SDK** | 交易鉴证 Token 获取 | 调用 A&M Backend 获取 transactionToken |
 | **MPoC SDK** | PIN 加密 | 使用 DUKPT 或 WhiteBox 加密 PIN |
 | **Android App** | 交易提交 | 将加密 PIN Block 提交到 POSP |
 | **SUNBAY POSP** | PIN 转加密 | 在 HSM 内将 PIN 转加密为 Processor ZPK 格式 |
 | **SUNBAY POSP** | 交易路由 | 将交易发送到对应的 Processor |
-| **A/M-Backend** | Token 管理 | 签发 transactionToken |
+| **A&M Backend** | Token 管理 | 签发 transactionToken |
 
 ### 8.3 API: 交易鉴证 Token 获取
 
@@ -1469,7 +1469,7 @@ sequenceDiagram
 | 403 | `SECURITY_CHECK_FAILED` | 安全检测失败 (Root/模拟器/Hook 等) |
 | 422 | `KEY_NOT_READY` | 密钥未就绪，无法进行交易 |
 
-> 📌 **说明**: `securityInfo` 字段与设备注册接口保持一致，SDK 在每次交易前重新执行安全检测并上报结果。
+> 📌 **说明**: `securityInfo` 字段与设备注册接口保持一致，SDK 在每笔交易前重新执行安全检测并上报结果。
 
 ### 8.4 App 提交交易到 POSP
 
@@ -1549,8 +1549,8 @@ flowchart TB
 |------|----------------|--------------|-----------------|
 | **适用 TEE 类型** | SE, TEE | WhiteBox-WBC | WhiteBox-Simple |
 | **密钥来源** | HSM 下载 | WBC 三层架构 | ECDH 协商 |
-| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每交易唯一 | 每交易生成新密钥 |
-| **每笔交易密钥** | 自动派生唯一密钥 | 与 PSP ECDH 协商 | 每次交易都生成新会话密钥 |
+| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每笔交易唯一 | 每笔交易生成新密钥 |
+| **每笔交易密钥** | 自动派生唯一密钥 | 与 PSP ECDH 协商 | 每笔交易都生成新会话密钥 |
 | **网络依赖** | 仅初始下载 | 每笔交易需协商 | 每笔交易需重新交换 |
 | **离线支持** | 支持 | 不支持 | 不支持 (每笔交易需网络) |
 | **前向安全性** | 每笔交易独立 | 每笔交易独立 | 每笔交易独立 |
@@ -1584,8 +1584,8 @@ WhiteBox-WBC 模式使用三层密钥架构，每笔交易与 PSP 进行 ECDH �
 | 组件 | 说明 |
 |------|------|
 | **CommWBC** | 通信级白盒密钥，预置在 SDK 中 |
-| **SCWBC** | 会话级白盒密钥，A&M Service 下发 |
-| **每交易密钥** | 与 PSP ECDH 协商，每笔交易唯一 |
+| **SCWBC** | 会话级白盒密钥，A&M Backend 下发 |
+| **每笔交易密钥** | 与 PSP ECDH 协商，每笔交易唯一 |
 | **ECC 曲线** | P-256 (secp256r1) |
 | **密钥派生** | HKDF-SHA256 |
 | **加密算法** | AES-256-GCM |
@@ -1613,7 +1613,19 @@ WhiteBox-WBC 模式使用三层密钥架构，每笔交易与 PSP 进行 ECDH �
 4. HKDF 派生 AES-256 会话密钥
 5. AES-GCM 加密 PIN
 
-### 9.5 PIN Block 格式
+### 9.5 WhiteBox 模式对比
+
+| 特性 | WhiteBox-WBC | WhiteBox-Simple |
+|------|-------------|----------------|
+| **密钥架构** | 三层（CommWBC + SCWBC + 每笔交易密钥） | 两层（设备证书 + 会话密钥） |
+| **密钥协商** | 每笔交易与PSP协商 | 每笔交易生成新密钥（无需协商） |
+| **激活流程** | 需要AuthCode激活 | 无需激活，直接证书签发 |
+| **网络依赖** | 每笔交易需要网络协商 | 仅初始化时需要网络 |
+| **安全级别** | ⭐⭐ 高 | ⭐⭐ 高 |
+| **实现复杂度** | 复杂 | 简单 |
+| **适用场景** | 高安全要求，网络稳定 | 网络不稳定，快速部署 |
+
+### 9.6 PIN Block 格式
 
 采用 ISO 9564 Format 0：
 
@@ -2305,7 +2317,7 @@ sequenceDiagram
 
 ## 12. SDK 版本管理
 
-### 10.1 功能说明
+### 12.1 功能说明
 
 SDK 版本管理用于确保设备上运行的 MPoC SDK 版本符合安全要求，主要功能包括：
 
@@ -2316,14 +2328,14 @@ SDK 版本管理用于确保设备上运行的 MPoC SDK 版本符合安全要求
 | **强制更新** | 当检测到安全漏洞时，强制要求更新 SDK |
 | **版本兼容性** | 检查当前版本与后端 API 的兼容性 |
 
-### 10.2 版本检查流程
+### 12.2 版本检查流程
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A/M-Backend
+    participant Backend as 🖥️ A&M Backend
 
     App->>SDK: MpocSdk.initialize(config)
     
@@ -2346,7 +2358,7 @@ sequenceDiagram
     end
 ```
 
-### 10.3 API: SDK 版本检查
+### 12.3 API: SDK 版本检查
 
 **端点**: `POST MPoC/api/sdk/version/check`
 
@@ -2515,7 +2527,7 @@ sequenceDiagram
 
 ## 14. 安全规范
 
-### 12.1 传输安全
+### 14.1 传输安全
 
 | 措施 | 说明 |
 |------|------|
@@ -2523,7 +2535,7 @@ sequenceDiagram
 | **证书固定** | 客户端验证服务器证书 |
 | **请求签名** | 关键 API 使用 ECDSA 签名 |
 
-### 12.2 数据安全
+### 14.2 数据安全
 
 | 数据类型 | 存储位置 | 保护措施 |
 |---------|---------|---------|
@@ -2534,7 +2546,7 @@ sequenceDiagram
 | PIN | 仅内存 | 不持久化，用后清除 |
 | PAN | 日志脱敏 | 仅显示后 4 位 |
 
-### 12.3 设备安全检测
+### 14.3 设备安全检测
 
 | 检测项 | 处理方式 |
 |--------|---------|
@@ -2544,7 +2556,7 @@ sequenceDiagram
 | 调试器检测 | 警告，可配置阻止 |
 | 应用完整性 | 签名校验，阻止篡改版本 |
 
-### 12.4 合规要求
+### 14.4 合规要求
 
 | 标准 | 要求 |
 |------|------|
@@ -2579,13 +2591,15 @@ sequenceDiagram
 | HKDF | HMAC-based Key Derivation Function | 基于 HMAC 的密钥派生函数 |
 | WBC | White-Box Cryptography | 白盒加密，软件实现的安全方案 |
 | CommWBC | Communication White-Box Cryptography | 通信级白盒加密密钥，预置在 SDK 中 |
-| SCWBC | Session Communication White-Box Cryptography | 会话级白盒加密密钥，A&M Service 下发 |
+| SCWBC | Session Communication White-Box Cryptography | 会话级白盒加密密钥，A&M Backend 下发 |
 | BEK | Backend Encryption Key | 后端加密密钥 |
 | AuthCode | Authorization Code | 商户侧绑定授权凭证 |
 | DF | Device Fingerprint | 设备指纹，包含软硬件测量值的唯一标识 |
 | EnDF | Encrypted Device Fingerprint | 加密的设备指纹 |
 | SWAuthLevel | Software Authorization Level | 软件授权等级，控制功能开关 |
 | EnSWAuthLevel | Encrypted Software Authorization Level | 加密的软件授权等级 |
+| hwFingerprint | Hardware Fingerprint | 硬件指纹，设备硬件特征的唯一标识 |
+| riskSummary | Risk Summary | 风险评估摘要，设备安全状态的综合评分 |
 | HW Fingerprint | Hardware Fingerprint | 硬件指纹，设备硬件特征标识 |
 | SCCERT | Secure Channel Certificate | 安全通道证书 |
 | SCPVK/SCPUK | Secure Channel Private/Public Key | 安全通道密钥对 |
@@ -2685,18 +2699,18 @@ MpocSdk.deregisterDevice(callback) → void
 | v2.0 | 2024-12-31 | 按 SDK 初始化调用顺序重构文档结构，明确模块职责划分 |
 | v2.1 | 2024-12-31 | 统一 securityInfo 字段；交易鉴证增加 transactionId；RKI API 前缀改为 /RKI/api/v1；补充 accessToken 使用说明和 API Header |
 | v2.2 | 2024-12-31 | 明确交易处理职责划分：SDK 负责 Token 获取和 PIN 加密，App 通过 A&M Backend 提交交易 |
-| v2.3 | 2024-12-31 | A/M-Backend API 路径从 /MPoC/api/v1 修改为 MPoC/api |
+| v2.3 | 2024-12-31 | A&M Backend API 路径从 /MPoC/api/v1 修改为 MPoC/api |
 | v2.4 | 2024-12-31 | 移除 POSP Token 验证流程；通信关系图增加处理顺序号；密钥下载确认改为 DUKPT 密钥锁定 |
 | v2.5 | 2024-12-31 | 增加 SDK 版本管理 API |
 | v2.6 | 2024-12-31 | WebSocket 修改为 HTTPS；Futurex 修改为 RKI |
 | v2.7 | 2024-12-31 | 移除 POSP 验证 transactionToken 流程 |
 | v2.8 | 2024-12-31 | 修复章节编号错误；更新通信关系图描述 |
 | v3.0 | 2026-01-08 | 补充设备生命周期管理、离线支付模式、密钥轮换等完整API设计；统一术语表和概念解释；增加定期鉴证、心跳监控、HTTPS推送通知机制 |
-| v3.1 | 2026-01-08 | 增加两种WhiteBox模式支持：WhiteBox-WBC（三层密钥架构，每交易协商）和WhiteBox-Simple（会话级协商）；补充WBC相关API和流程描述 |
+| v3.1 | 2026-01-08 | 增加两种WhiteBox模式支持：WhiteBox-WBC（三层密钥架构，每笔交易协商）和WhiteBox-Simple（每笔交易生成新密钥）；补充WBC相关API和流程描述 |
 | v3.2 | 2026-01-08 | 统一终端相关字段与端云交互流程文档：增加hwFingerprint、swAuthLevel、riskSummary等字段；修正API请求响应格式；完善术语表定义 |
 | v3.3 | 2026-01-08 | 修正逻辑错误：移除设备注册API中的authCode字段；增加AuthCode外部获取流程；修正WBC交易密钥协商API端点；完善流程描述的准确性 |
-| v3.4 | 2026-01-08 | 修正WhiteBox-Simple模式密钥层次结构：移除30分钟有效期限制，改为每次交易都生成新的会话密钥；更新相关API和错误处理；提升安全级别为⭐⭐高 |
+| v3.4 | 2026-01-08 | 修正WhiteBox-Simple模式密钥层次结构：移除30分钟有效期限制，改为每笔交易都生成新的会话密钥；更新相关API和错误处理；提升安全级别为⭐⭐高 |
 | v3.5 | 2026-01-08 | 移除HTTPS推送通知机制和accessToken认证机制：删除2.3节推送通知内容、移除所有API的Authorization头、简化设备注册响应、移除NotificationManager模块 |
 | v3.6 | 2026-01-08 | 修改AuthCode获取流程：更新7.2.1节为SUNBAY平台模式，机构客户在平台绑定设备到商户，商户在设备上输入AuthCode激活 |
-| v3.7 | 2026-01-08 | 修复文档错误和不一致性：更新版本号到v3.6、修正PIN加密方案描述、统一WhiteBox-Simple安全级别为⭐⭐高、移除通信图中HTTPS推送引用、更新WhiteBox-Simple描述 |
+| v3.7 | 2026-01-08 | 修复文档错误和不一致性：更新版本号到v3.7、修正PIN加密方案描述、统一WhiteBox-Simple安全级别为⭐⭐高、移除通信图中HTTPS推送引用、更新WhiteBox-Simple描述 |
 | v3.8 | 2026-01-09 | 重新梳理设备状态流程：统一设备状态定义(REGISTERED/ACTIVATED/ACTIVE/SUSPENDED/DEREGISTERED)、修复章节编号错误(13.1-13.4)、完善设备状态转换图、修正证书签发前置条件 |
