@@ -1,7 +1,7 @@
 # SUNBAY MPoC SDK API 交互指南
 
-**版本**: v3.8  
-**日期**: 2026-01-09  
+**版本**: v4.0  
+**日期**: 2026-01-16  
 **适用对象**: Android MPoC SDK 开发者
 
 ---
@@ -45,7 +45,8 @@ implementation 'com.sunbay:mpoc-sdk:1.0.0'
 
 | 特性 | 说明 |
 |------|------|
-| **PIN 加密** | 支持 DUKPT (SE/TEE)、WhiteBox-WBC 和 WhiteBox-Simple 三种方案 |
+| **PIN 加密** | 支持 DUKPT (SE/TEE) 和 WhiteBox-Simple 两种方案 |
+| **鉴证数据加密** | 使用 CommWBC (WhiteBox-WBC) 加密鉴证数据 |
 | **安全检测** | 实时检测 Root、模拟器、Hook 等威胁 |
 | **交易处理** | 支持消费、退款、撤销、预授权等交易类型 |
 | **合规认证** | 符合 PCI-DSS、PCI PIN 安全标准 |
@@ -125,9 +126,6 @@ flowchart TB
 | 证书签发 | CSR 签发 | `MPoC/api/certificates/sign` | POST |
 | 证书管理 | 证书续期 | `MPoC/api/certificates/renew` | POST |
 | ECC密钥交换 | ECC 密钥交换 | `MPoC/api/keys/ecc/exchange` | POST |
-| WBC管理 | WBC 初始化 | `MPoC/api/wbc/initialize` | POST |
-| WBC管理 | WBC 密钥轮换 | `MPoC/api/keys/wbc/rotate` | POST |
-| 密钥管理 | 会话密钥刷新 | `MPoC/api/keys/session/refresh` | POST |
 | 安全监控 | 威胁上报 | `MPoC/api/threats/report` | POST |
 | 安全监控 | 定期鉴证 | `MPoC/api/attestation/periodic` | POST |
 | 安全监控 | 心跳监控 | `MPoC/api/monitoring/heartbeat` | POST |
@@ -151,13 +149,7 @@ flowchart TB
 |-----|------|------|
 | CA 证书签发 | `/RKI/api/v1/ca/sign` | CSR 证书签发 |
 
-#### 2.2.4 A&M Backend → SUNBAY POSP (内部转发)
-
-| API | 端点 | 方法 | 说明 |
-|-----|------|------|------|
-| 交易密钥协商 | `MPoC/api/wbc/transaction-key-exchange` | POST | A&M Backend 转发到 POSP 的密钥协商 |
-
-#### 2.2.5 Android App → A&M Backend
+#### 2.2.4 Android App → A&M Backend
 
 | API | 端点 | 方法 | 说明 |
 |-----|------|------|------|
@@ -228,13 +220,13 @@ graph TB
 
 | 模块 | 职责 | 主要接口 | 调用阶段 |
 |------|------|---------|---------|
-| **DeviceManager** | 设备注册、状态查询、TEE 类型检测 | `registerDevice()`, `getDeviceStatus()` | 阶段一 |
+| **DeviceManager** | 设备注册、状态查询、终端安全环境类型检测 | `registerDevice()`, `getDeviceStatus()` | 阶段一 |
 | **SecurityChecker** | Root/模拟器/Hook 检测、威胁上报 | `checkSecurity()`, `reportThreat()` | 阶段一 |
-| **CertManager** | ECC 密钥对生成、CSR 创建、证书存储 | `generateKeyPair()`, `submitCsr()` | 阶段二 |
+| **CertManager** | CSR 创建、证书存储 (密钥对由 Keystore 生成) | `createCsr()`, `storeCertificate()` | 阶段二 |
 | **KeyManager** | DUKPT 密钥下载、KSN 管理 | `downloadKey()`, `confirmDownload()` | 阶段三 (SE/TEE) |
-| **WbcEngine** | WBC 安全通道建立、三层密钥管理、密钥轮换 | `initializeWbc()`, `exchangeTransactionKey()`, `rotateWbcKey()` | 阶段三 (WhiteBox-WBC) |
+| **WbcEngine** | CommWBC 鉴证数据加密 (所有终端安全环境类型通用) | `encryptAttestationData()` | 全阶段 |
 | **WhiteBoxEngine** | DH-ECC 密钥交换、会话密钥派生 | `initKeyExchange()`, `deriveSessionKey()` | 阶段三 (WhiteBox-Simple) |
-| **CryptoEngine** | PIN Block 生成、加密 (支持 SE/TEE/WhiteBox) | `encryptPin()`, `getTeeType()` | 阶段四 |
+| **CryptoEngine** | PIN Block 生成、加密 (支持 SE/TEE/WhiteBox-Simple) | `encryptPin()`, `getTeeType()` | 阶段四 |
 | **TokenManager** | 交易令牌申请、有效期管理 | `requestToken()`, `validateToken()` | 阶段四 |
 | **TransactionProcessor** | 交易鉴证、交易数据封装 | `attestTransaction()`, `prepareTransaction()` | 阶段四 |
 | **LifecycleManager** | 设备生命周期管理、注销流程 | `deregisterDevice()`, `getDeviceStatus()` | 全阶段 |
@@ -253,25 +245,21 @@ SDK 初始化按以下顺序执行，每个阶段必须成功完成后才能进�
 flowchart TB
     subgraph "阶段一: 设备注册"
         A1["1.1 安全环境检测"] --> A2["1.2 设备注册"]
-        A2 --> A3["1.3 AuthCode 激活 (仅 WBC)"]
-        A3 --> A4["1.4 建立 HTTPS 连接"]
+        A2 --> A3["1.3 建立 TLS 连接"]
     end
     
     subgraph "阶段二: 证书签发"
-        B1["2.1 生成 ECC 密钥对"] --> B2["2.2 提交 CSR"]
+        B1["2.1 Keystore 生成密钥对"] --> B2["2.2 创建并提交 CSR"]
         B2 --> B3["2.3 存储证书"]
     end
     
     subgraph "阶段三: 密钥初始化"
-        C1{"TEE 类型?"}
+        C1{"终端安全环境类型?"}
         C1 -->|SE/TEE| C2["3.1a DUKPT 密钥下载"]
-        C1 -->|WhiteBox-WBC| C3["3.1b WBC 安全通道建立"]
-        C1 -->|WhiteBox-Simple| C4["3.1c ECC 密钥交换"]
+        C1 -->|WhiteBox-Simple| C4["3.1b 每笔交易 DH-ECC 协商"]
         C2 --> C5["3.2a 存储到 TEE/SE"]
-        C3 --> C6["3.2b 建立 WBC 通道"]
-        C4 --> C7["3.2c 派生会话密钥"]
+        C4 --> C7["3.2b 后端 HSM 密钥协商"]
         C5 --> C8["密钥就绪"]
-        C6 --> C8
         C7 --> C8
     end
     
@@ -280,7 +268,11 @@ flowchart TB
         D2 --> D3["4.3 交易提交"]
     end
     
-    A4 --> B1
+    subgraph "鉴证数据加密 (全阶段通用)"
+        G["CommWBC 加密鉴证数据"]
+    end
+    
+    A3 --> B1
     B3 --> C1
     C8 --> D1
     
@@ -291,33 +283,33 @@ flowchart TB
     style B2 fill:#fff8e1,stroke:#e65100
     style B3 fill:#fff8e1,stroke:#e65100
     style C2 fill:#e8f5e9,stroke:#388e3c
-    style C3 fill:#e8f5e9,stroke:#388e3c
     style C4 fill:#e8f5e9,stroke:#388e3c
     style D1 fill:#fce4ec,stroke:#c2185b
     style D2 fill:#fce4ec,stroke:#c2185b
     style D3 fill:#fce4ec,stroke:#c2185b
+    style G fill:#fff3e0,stroke:#f57c00
 ```
 
-### 4.2 TEE 类型说明
+### 4.2 终端安全环境类型说明
 
-SDK 根据设备硬件能力自动检测 TEE 类型，不同类型决定后续密钥初始化方式：
+SDK 根据设备硬件能力自动检测终端安全环境类型，不同类型决定后续密钥初始化方式：
 
-| **TEE 类型** | **说明** | **安全级别** | **密钥初始化方式** | **密钥存储位置** |
+| **终端安全环境类型** | **说明** | **安全级别** | **密钥初始化方式** | **密钥存储位置** |
 |--------------|---------|-------------|------------------|-----------------|
 | **SE** | Secure Element，独立安全芯片 | ⭐⭐⭐ 最高 | DUKPT 密钥下载 | SE 芯片内 |
 | **TEE** | ARM TrustZone 可信执行环境 | ⭐⭐ 高 | DUKPT 密钥下载 | TEE 安全区 |
-| **WhiteBox-WBC** | WBC 白盒加密（每笔交易协商） | ⭐⭐ 高 | WBC 安全通道 + 每笔交易 ECDH | WBC 保护内存 |
-| **WhiteBox-Simple** | 简化白盒加密（每笔交易生成新密钥） | ⭐⭐ 高 | DH-ECC 密钥交换 | WhiteBox 保护内存 |
+| **WhiteBox-Simple** | 白盒加密（每笔交易 DH-ECC） | ⭐⭐ 高 | DH-ECC 密钥交换 (HSM) | WhiteBox 保护内存 + HSM |
 
-#### 4.2.1 TEE 类型检测算法
+> 📌 **鉴证数据加密**: 所有终端安全环境类型都使用 CommWBC (WhiteBox-WBC) 对鉴证数据进行加密，这是通用功能，不是独立的终端安全环境类型。
 
-SDK 按以下优先级顺序检测设备 TEE 类型：
+#### 4.2.1 终端安全环境类型检测算法
+
+SDK 按以下优先级顺序检测设备终端安全环境类型：
 
 ```java
 public enum TeeType {
     SE,              // 最高优先级
     TEE,             // 高优先级  
-    WHITEBOX_WBC,    // 中优先级
     WHITEBOX_SIMPLE  // 最低优先级（fallback）
 }
 ```
@@ -329,22 +321,20 @@ public enum TeeType {
 2. **TEE 检测**: 检查 ARM TrustZone 支持
    - 检测方法: `hasTrustZone()`
    - 验证: TEE 环境可用性和密钥存储能力
-3. **WhiteBox-WBC**: 检查 WBC 白盒加密支持
-   - 检测方法: `hasWhiteBoxWBC()`
-   - 验证: CommWBC 预置密钥完整性
-4. **WhiteBox-Simple**: 默认 fallback 模式
+3. **WhiteBox-Simple**: 默认 fallback 模式
    - 适用: 所有 Android 设备
    - 要求: 最低 Android 7.0 (API 24)
+   - 用途: PIN 加密 (后端 HSM 协商)
 
 **Fallback 机制**:
-- 如果高优先级 TEE 类型检测失败，自动降级到下一级
+- 如果高优先级终端安全环境类型检测失败，自动降级到下一级
 - 最终 fallback 到 WhiteBox-Simple（保证兼容性）
 - 检测结果缓存，避免重复检测
 
 > ⚠️ **重要**: 
-> - **WhiteBox-WBC**: 符合端云交互流程设计，使用 AuthCode + CommWBC + SCWBC 三层密钥架构
-> - **WhiteBox-Simple**: 简化实现，使用设备证书 + 会话密钥两层架构
-> - 所有 TEE 类型都需要先完成证书签发，证书是后续密钥操作的身份凭证
+> - **CommWBC (鉴证加密)**: 所有终端安全环境类型通用，用于加密设备指纹、安全信息等鉴证数据
+> - **WhiteBox-Simple**: 用于 PIN 加密，每笔交易通过 DH-ECC 与后端 HSM 协商密钥
+> - 所有终端安全环境类型都需要先完成证书签发，证书是后续密钥操作的身份凭证
 
 ---
 
@@ -438,116 +428,13 @@ sequenceDiagram
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | `deviceId` | string | 设备唯一标识，后续所有 API 调用需携带 |
-| `status` | string | 设备状态: `REGISTERED`, `ACTIVATED`, `ACTIVE`, `SUSPENDED`, `DEREGISTERED` |
-| `teeType` | string | TEE 类型: `SE`, `TEE`, `WhiteBox-WBC`, `WhiteBox-Simple` |
-| `keyMode` | string | 密钥模式: `DUKPT` (SE/TEE), `WBC` (WhiteBox-WBC), `DH-ECC` (WhiteBox-Simple) |
-
-> ⚠️ **重要**: 
-> - WhiteBox-WBC 模式需要商户通过**外部渠道**（门户/邮件）获取 AuthCode
-> - AuthCode 不在设备注册API中返回，而是通过独立的商户管理流程获得
+| `status` | string | 设备状态: `REGISTERED`, `ACTIVE`, `SUSPENDED`, `DEREGISTERED` |
+| `teeType` | string | 终端安全环境类型: `SE`, `TEE`, `WhiteBox-Simple` |
+| `keyMode` | string | 密钥模式: `DUKPT` (SE/TEE), `DH-ECC` (WhiteBox-Simple) |
 
 > 📌 SDK 根据 `teeType` 和 `keyMode` 决定阶段三的密钥初始化方式。
 
-### 5.3 AuthCode 获取与设备激活 (WhiteBox-WBC 模式)
-
-对于 TEE 类型为 `WhiteBox-WBC` 的设备，需要在设备注册后通过 SUNBAY 平台完成设备绑定和 AuthCode 获取流程：
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Customer as 👤 机构客户
-    participant Platform as 🌐 SUNBAY平台
-    participant Merchant as 🏪 商户
-    participant Device as 📱 设备
-    participant AM as 🖥️ A&M Backend
-
-    Note over Customer,AM: 前置条件: 设备已注册且状态为 REGISTERED
-    
-    Customer->>Platform: 登录SUNBAY平台
-    Platform->>Platform: 查询可用设备列表
-    
-    Customer->>Platform: 选择设备并绑定到指定商户
-    Platform->>AM: 提交设备-商户绑定请求
-    AM->>AM: 验证绑定权限和商户信息
-    
-    alt 绑定成功
-        AM->>AM: 生成设备专用 AuthCode
-        AM-->>Platform: 返回 AuthCode
-        Platform-->>Customer: 显示 AuthCode
-        
-        Customer->>Merchant: 提供 AuthCode 给商户
-        Note over Customer,Merchant: 通过安全渠道传递 AuthCode
-        
-        Merchant->>Device: 在设备上输入 AuthCode
-        Device->>AM: POST MPoC/api/devices/activate
-        AM->>AM: 验证 AuthCode 与设备绑定关系
-        
-        alt AuthCode 验证成功
-            AM->>AM: 更新设备状态为 ACTIVATED
-            AM-->>Device: 返回激活成功
-            Device->>Device: 设备进入可用状态
-            Note over Device: 设备已激活，可进行后续证书签发和密钥初始化
-        else AuthCode 验证失败
-            AM-->>Device: 返回激活失败
-            Device->>Device: 设备保持 REGISTERED 状态
-        end
-    else 绑定失败
-        AM-->>Platform: 返回失败原因
-        Platform-->>Customer: 显示错误信息
-    end
-```
-
-> ⚠️ **重要**: 
-> - AuthCode 是一次性使用的授权凭证，用于建立机构客户、商户与设备的三方绑定关系
-> - 机构客户负责在SUNBAY平台上管理设备分配
-> - 商户在设备上输入AuthCode完成设备激活，激活后设备才能进行证书签发和密钥初始化
-> - 只有 WhiteBox-WBC 模式的设备需要 AuthCode 激活流程
-
-#### 5.3.1 API: 设备激活
-
-**端点**: `POST MPoC/api/devices/activate`
-
-**负责模块**: DeviceManager
-
-**请求**:
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "authCode": "AUTH-1234-5678-9ABC-DEF0",
-  "merchantInfo": {
-    "merchantId": "merchant-001",
-    "terminalId": "terminal-001"
-  },
-  "timestamp": "2024-12-30T10:00:00Z"
-}
-```
-
-**响应**:
-```json
-{
-  "code": 200,
-  "data": {
-    "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-    "status": "ACTIVATED",
-    "merchantId": "merchant-001",
-    "activatedAt": "2024-12-30T10:00:00Z",
-    "authCodeUsed": true
-  },
-  "message": "Device activated successfully"
-}
-```
-
-**错误响应**:
-
-| 错误码 | 错误类型 | 说明 |
-|--------|---------|------|
-| 400 | `INVALID_AUTH_CODE` | AuthCode 格式无效 |
-| 403 | `AUTH_CODE_EXPIRED` | AuthCode 已过期 |
-| 404 | `DEVICE_NOT_FOUND` | 设备不存在 |
-| 409 | `DEVICE_ALREADY_ACTIVATED` | 设备已激活 |
-| 422 | `AUTH_CODE_MISMATCH` | AuthCode 与设备不匹配 |
-
-### 5.4 API: 威胁上报
+### 5.3 API: 威胁上报
 
 **端点**: `POST MPoC/api/threats/report`
 
@@ -602,7 +489,7 @@ Content-Type: application/json
 
 ### 6.1 流程说明
 
-设备注册成功后，SDK 生成 ECC 密钥对并提交 CSR，由 RKI CloudHSM CA 签发设备证书。**证书是后续 DUKPT 和 WhiteBox 两种模式的共同前提**。
+设备注册成功后，SDK 使用 Android Keystore 生成 ECC 密钥对并创建 CSR，由 RKI CloudHSM CA 签发设备证书。**证书是后续 DUKPT 和 WhiteBox-Simple 两种模式的共同前提**。
 
 ```mermaid
 sequenceDiagram
@@ -612,19 +499,19 @@ sequenceDiagram
     participant Backend as 🖥️ A&M Backend
     participant HSM as 🔐 RKI CloudHSM
 
-    Note over App,HSM: 前置条件: SE/TEE设备状态为REGISTERED，WhiteBox-WBC设备状态为ACTIVATED
+    Note over App,HSM: 前置条件: 设备状态为 REGISTERED
     
     rect rgb(227, 242, 253)
-        Note over SDK: 2.1 生成 ECC 密钥对
-        SDK->>SDK: CertManager.generateKeyPair(P-256)
-        SDK->>SDK: 存储私钥到 Android Keystore
+        Note over SDK: 2.1 生成密钥对并创建 CSR
+        SDK->>SDK: Android Keystore 生成 ECC 密钥对 (P-256)
         SDK->>SDK: CertManager.createCsr()
+        Note right of SDK: 私钥存储在 Keystore，不可导出
     end
     
     rect rgb(255, 248, 225)
         Note over SDK,HSM: 2.2 提交 CSR
         SDK->>Backend: POST MPoC/api/certificates/sign
-        Backend->>Backend: 验证设备状态 (SE/TEE:REGISTERED, WBC:ACTIVATED)
+        Backend->>Backend: 验证设备状态
         Backend->>HSM: POST /RKI/api/v1/ca/sign
         HSM->>HSM: 验证 CSR → 签发证书
         HSM-->>Backend: certificate + chain
@@ -733,55 +620,53 @@ graph TB
 
 ## 7. 阶段三：密钥初始化
 
-证书签发完成后，根据 TEE 类型进入不同的密钥初始化流程：
+证书签发完成后，根据终端安全环境类型进入不同的密钥初始化流程：
 
 - **SE/TEE 设备**: 使用 DUKPT 密钥下载 (7.1)
-- **WhiteBox-WBC 设备**: 使用 WBC 安全通道建立 (7.2)
 - **WhiteBox-Simple 设备**: 使用 DH-ECC 密钥交换 (7.3)
+
+> 📌 **鉴证数据加密 (7.2)**: 所有终端安全环境类型通用，使用 CommWBC 加密鉴证数据
 
 ```mermaid
 flowchart TB
-    A[证书签发完成] --> B{TEE 类型?}
+    A[证书签发完成] --> B{终端安全环境类型?}
     
     B -->|SE| C[DUKPT 模式]
     B -->|TEE| C
-    B -->|WhiteBox-WBC| D[WBC 模式]
     B -->|WhiteBox-Simple| E[DH-ECC 模式]
     
     subgraph "DUKPT 模式 (SE/TEE)"
-        C --> C1[等待 HTTPS 通知]
-        C1 --> C2[直连 HSM 下载密钥]
-        C2 --> C3[存储到 TEE/SE]
-        C3 --> C4[确认下载完成]
-    end
-    
-    subgraph "WBC 模式 (WhiteBox-WBC)"
-        D --> D1[验证设备激活状态]
-        D1 --> D2[获取 SCWBC 会话密钥]
-        D2 --> D3[建立 WBC 安全通道]
+        C --> C1[直连 HSM 下载密钥]
+        C1 --> C2[存储到 TEE/SE]
+        C2 --> C3[确认下载完成]
     end
     
     subgraph "DH-ECC 模式 (WhiteBox-Simple)"
-        E --> E1[生成临时 ECDH 密钥对]
-        E1 --> E2[发起密钥交换]
-        E2 --> E3[派生 AES-256 会话密钥]
-        E3 --> E4[存储到 WhiteBox 保护内存]
+        E --> E1[每笔交易生成临时 ECDH 密钥对]
+        E1 --> E2[发起密钥交换 (后端 HSM)]
+        E2 --> E3[HSM 内派生 AES-256 会话密钥]
+        E3 --> E4[客户端派生会话密钥]
     end
     
-    C4 --> F[密钥就绪]
-    D3 --> F
+    C3 --> F[密钥就绪]
     E4 --> F
     
+    subgraph "鉴证数据加密 (所有类型通用)"
+        G[CommWBC 加密鉴证数据]
+    end
+    
+    A --> G
+    
     style C fill:#e8f5e9,stroke:#388e3c
-    style D fill:#fff3e0,stroke:#f57c00
     style E fill:#fff8e1,stroke:#e65100
+    style G fill:#fff3e0,stroke:#f57c00
 ```
 
 ### 7.1 DUKPT 密钥下载 (SE/TEE 模式)
 
 #### 7.1.1 流程说明
 
-适用于 TEE 类型为 `SE` 或 `TEE` 的设备。SDK 直接调用 RKI CloudHSM API 下载密钥，使用设备证书进行身份认证。
+适用于 终端安全环境类型为 `SE` 或 `TEE` 的设备。SDK 直接调用 RKI CloudHSM API 下载密钥，使用设备证书进行身份认证。
 
 ```mermaid
 sequenceDiagram
@@ -904,285 +789,79 @@ signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
 }
 ```
 
-### 7.2 WBC 安全通道建立 (WhiteBox-WBC 模式)
+### 7.2 CommWBC 鉴证数据加密 (所有终端安全环境类型通用)
 
-#### 7.2.1 流程说明
+#### 7.2.1 概述
 
-适用于 TEE 类型为 `WhiteBox-WBC` 的设备。使用三层密钥架构：CommWBC（预置）→ SCWBC（会话级）→ 每笔交易密钥（与PSP协商）。
+CommWBC 鉴证数据加密是**所有终端安全环境类型通用**的功能，使用预置的 CommWBC 密钥对设备鉴证信息进行加密保护。
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant App as 📱 Android App
-    participant SDK as 🛡️ MPoC SDK
-    participant Backend as 🖥️ A&M Backend
-    participant PSP as 🏦 SUNBAY POSP
-
-    Note over App,PSP: 前置条件: 设备证书已签发，设备已通过 AuthCode 完成激活
-    
-    rect rgb(255, 243, 224)
-        Note over SDK: Phase 1: WBC 初始化请求
-        SDK->>SDK: 生成 InitialReq 报文
-        SDK->>Backend: POST MPoC/api/wbc/initialize
-        Note right of SDK: 使用设备证书认证 + 设备信息
-    end
-    
-    rect rgb(232, 245, 233)
-        Note over Backend: Phase 2: SCWBC 下发
-        Backend->>Backend: 验证设备激活状态
-        Backend->>Backend: 生成会话级 WBC 密钥 (SCWBC)
-        Backend-->>SDK: 返回 SCWBC + SWAuthLevel
-        Note right of Backend: 使用 CommWBC 加密下发
-    end
-    
-    rect rgb(227, 242, 253)
-        Note over SDK: Phase 3: WBC 安全通道建立
-        SDK->>SDK: 解密并安装 SCWBC
-        SDK->>SDK: 建立 WBC 安全通道
-        SDK->>Backend: 确认安全通道建立
-        Note right of SDK: 使用 SCWBC 保护通信
-    end
-    
-    SDK-->>App: callback.onWbcChannelReady(swAuthLevel)
-```
-
-#### 7.2.2 WBC 密钥层次结构
+#### 7.2.2 CommWBC 密钥用途
 
 ```mermaid
 graph TB
-    subgraph "预置密钥层"
+    subgraph "CommWBC 密钥用途 (所有终端安全环境类型通用)"
         CommWBC["🔐 CommWBC<br/>(通信级白盒密钥)<br/>预置在 SDK 中"]
     end
     
-    subgraph "会话密钥层"
-        SCWBC["🔑 SCWBC<br/>(会话级白盒密钥)<br/>A&M 下发，有效期 24 小时"]
+    subgraph "鉴证数据加密"
+        DF["📋 设备指纹 (Device Fingerprint)"]
+        SI["🔒 安全信息 (Security Info)"]
+        RS["📊 风险摘要 (Risk Summary)"]
     end
     
-    subgraph "交易密钥层"
-        TxKey["🔒 每笔交易密钥<br/>(与 PSP ECDH 协商)<br/>每笔交易唯一"]
-    end
-    
-    CommWBC -->|加密保护| SCWBC
-    SCWBC -->|建立安全通道| TxKey
+    CommWBC -->|加密保护| DF
+    CommWBC -->|加密保护| SI
+    CommWBC -->|加密保护| RS
     
     style CommWBC fill:#fff3e0,stroke:#f57c00
-    style SCWBC fill:#fff3e0,stroke:#f57c00
-    style TxKey fill:#fff3e0,stroke:#f57c00
+    style DF fill:#e3f2fd,stroke:#1976d2
+    style SI fill:#e3f2fd,stroke:#1976d2
+    style RS fill:#e3f2fd,stroke:#1976d2
 ```
 
-| 密钥类型 | 生命周期 | 用途 | 存储位置 |
-|---------|---------|------|---------|
-| CommWBC | 永久 (预置) | 保护 AuthCode 和 SCWBC 传输 | WBC 保护内存 |
-| SCWBC | 24 小时 | 建立设备与 A&M 的安全通道 | WBC 保护内存 |
-| **每笔交易密钥** | 单笔交易 | PIN/PAN 加密 | WBC 保护内存 (用后销毁) |
+| 密钥类型 | 生命周期 | 用途 | 存储位置 | 适用范围 |
+|---------|---------|------|---------|---------|
+| CommWBC | 永久 (预置) | **鉴证数据加密** | WBC 保护内存 | 所有终端安全环境类型 |
 
-#### 7.2.3 安全通道生命周期管理
+#### 7.2.3 鉴证数据加密流程
 
-**SCWBC 安全通道生命周期**:
-
-1. **建立阶段** (Phase 3 完成后)
-   - SCWBC 安装成功，安全通道激活
-   - 状态: `CHANNEL_ACTIVE`
-   - 有效期: 24小时
-
-2. **使用阶段** (交易密钥协商)
-   - 每笔交易前通过 SCWBC 通道协商交易密钥
-   - 通道复用，无需重新建立
-   - 状态: `CHANNEL_IN_USE`
-
-3. **续期阶段** (接近过期时)
-   - 剩余时间 < 2小时时自动续期
-   - 后台静默更新 SCWBC
-   - 状态: `CHANNEL_RENEWING`
-
-4. **过期处理**
-   - SCWBC 过期后自动失效
-   - 状态: `CHANNEL_EXPIRED`
-   - 需重新执行 WBC 初始化流程
-
-**交易密钥生命周期**:
-- **生成**: 每笔交易前 ECDH 协商
-- **使用**: 仅用于当前交易的 PIN 加密
-- **销毁**: 交易完成后立即销毁 (5分钟内)
-- **状态跟踪**: `KEY_GENERATED` → `KEY_ACTIVE` → `KEY_DESTROYED`
-
-#### 7.2.4 API: WBC 初始化
-
-**端点**: `POST MPoC/api/wbc/initialize`
-
-**负责模块**: WbcEngine
-
-**请求**:
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "encryptedDeviceFingerprint": "base64_commwbc_encrypted_df",
-  "encryptionMethod": "CommWBC",
-  "timestamp": "2024-12-30T10:00:00Z",
-  "requestId": "wbc-init-20241230-001"
-}
-```
-
-**响应**:
-```json
-{
-  "code": 200,
-  "data": {
-    "encryptedScwbc": "base64_commwbc_encrypted_scwbc",
-    "encryptedDeviceFingerprint": "base64_bek_encrypted_df",
-    "encryptedSwAuthLevel": "base64_bek_encrypted_sw_auth_level",
-    "swAuthLevel": "STANDARD",
-    "sessionId": "wbc-sess-20241230-001",
-    "scwbcExpiresAt": "2024-12-31T10:00:00Z",
-    "allowedOperations": ["TRANSACTION", "KEY_EXCHANGE"],
-    "policyVersion": "1.2.0"
-  },
-  "message": "WBC initialization successful"
-}
-```
-
-#### 7.2.5 WBC 交易密钥协商
-
-每笔交易前，SDK 通过 A&M Backend 与 POSP 进行 ECDH 密钥协商：
+所有需要上报的鉴证数据必须使用 CommWBC 进行加密：
 
 ```mermaid
 sequenceDiagram
     autonumber
     participant SDK as 🛡️ MPoC SDK
     participant Backend as 🖥️ A&M Backend
-    participant PSP as 🏦 SUNBAY POSP
 
-    Note over SDK,PSP: 每笔交易前的密钥协商 (通过 A&M 转发)
+    Note over SDK,Backend: 鉴证数据上报流程 (所有终端安全环境类型通用)
     
     rect rgb(255, 243, 224)
-        Note over SDK: 生成临时密钥对
-        SDK->>SDK: 生成临时 ECDH 密钥对 (DePub, DePriv)
-        SDK->>Backend: 发送密钥协商请求 + DePub
-        Note right of SDK: 通过 SCWBC 安全通道传输
+        Note over SDK: 收集鉴证数据
+        SDK->>SDK: 收集设备指纹 (hwFingerprint)
+        SDK->>SDK: 收集安全信息 (securityInfo)
+        SDK->>SDK: 生成风险摘要 (riskSummary)
     end
     
     rect rgb(232, 245, 233)
-        Note over Backend: 转发到 POSP
-        Backend->>PSP: 转发密钥协商请求
-        Note right of Backend: 内部安全通道 (Backend ↔ POSP)
-        
-        Note over PSP: HSM 内密钥协商
-        PSP->>PSP: HSM 生成临时密钥对 (HoPub, HoPriv)
-        PSP->>PSP: 计算共享密钥 SharedSecret = ECDH(HoPriv, DePub)
-        PSP->>PSP: 派生交易密钥 TxKey = HKDF(SharedSecret, TxInfo)
-        PSP-->>Backend: 返回 HoPub + SharedInfo
+        Note over SDK: CommWBC 加密
+        SDK->>SDK: 使用 CommWBC 加密设备指纹
+        SDK->>SDK: 使用 CommWBC 加密安全信息
+        SDK->>SDK: 使用 CommWBC 加密风险摘要
     end
     
     rect rgb(227, 242, 253)
-        Note over Backend: 转发响应
-        Backend-->>SDK: 转发 POSP 响应
-        Note right of Backend: 通过 SCWBC 安全通道传输
-        
-        Note over SDK: 派生交易密钥
-        SDK->>SDK: 计算共享密钥 SharedSecret = ECDH(DePriv, HoPub)
-        SDK->>SDK: 派生交易密钥 TxKey = HKDF(SharedSecret, TxInfo)
-        SDK->>SDK: 销毁临时私钥 DePriv
+        Note over SDK,Backend: TLS 安全通道传输
+        SDK->>Backend: 通过 TLS 1.3 发送加密鉴证数据
+        Backend->>Backend: 解密并验证鉴证数据
+        Backend-->>SDK: 返回鉴证结果
     end
-    
-    Note over SDK,PSP: 交易密钥就绪，用于 PIN/PAN 加密
 ```
-
-#### 7.2.6 API: 交易密钥协商
-
-**端点**: `POST MPoC/api/wbc/transaction-key-exchange`
-
-**负责模块**: WbcEngine
-
-> ⚠️ **重要**: 此API由A&M Backend提供，内部转发到SUNBAY POSP
-
-**请求**:
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "transactionId": "txn-20241230-001",
-  "ephemeralPublicKey": "04a1b2c3d4e5f6...",
-  "curve": "P-256",
-  "kdfInfo": "SUNBAY_PIN_ENCRYPTION_V1",
-  "timestamp": "2024-12-30T10:00:00Z"
-}
-```
-
-**请求参数说明**:
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `deviceId` | string | 是 | 设备唯一标识 |
-| `transactionId` | string | 是 | 交易流水号 (由 App 生成，全局唯一) |
-| `ephemeralPublicKey` | string | 是 | 临时 ECDH 公钥 (P-256 曲线，未压缩格式 04 + X + Y) |
-| `curve` | string | 是 | ECC 曲线: `P-256` |
-| `kdfInfo` | string | 是 | 密钥派生信息标签: `SUNBAY_PIN_ENCRYPTION_V1` |
-| `timestamp` | string | 是 | 请求时间戳 (UTC) |
-
-**A&M Backend 内部转发到 POSP**:
-
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "transactionId": "txn-20241230-001",
-  "ephemeralPublicKey": "04a1b2c3d4e5f6...",
-  "curve": "P-256",
-  "kdfInfo": "SUNBAY_PIN_ENCRYPTION_V1",
-  "timestamp": "2024-12-30T10:00:00Z",
-  "merchantId": "merchant-001",
-  "terminalId": "term-001"
-}
-```
-
-**响应**:
-
-```json
-{
-  "code": 200,
-  "data": {
-    "serverEphemeralPublicKey": "04f1e2d3c4b5a6...",
-    "transactionKeyId": "txkey-20241230-001",
-    "kdfParams": {
-      "algorithm": "HKDF-SHA256",
-      "info": "SUNBAY_PIN_ENCRYPTION_V1",
-      "keyLength": 256
-    },
-    "expiresAt": "2024-12-30T10:05:00Z"
-  },
-  "message": "Transaction key exchange successful"
-}
-```
-
-**响应字段说明**:
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `serverEphemeralPublicKey` | string | 服务端临时 ECDH 公钥 |
-| `transactionKeyId` | string | 交易密钥标识符，用于后续 PIN 加密 |
-| `kdfParams.algorithm` | string | 密钥派生算法: `HKDF-SHA256` |
-| `kdfParams.info` | string | 密钥派生信息 (与请求一致) |
-| `kdfParams.keyLength` | number | 密钥长度: 256 位 |
-| `expiresAt` | string | 交易密钥过期时间 (UTC)，默认 5 分钟 |
-
-**错误响应**:
-
-| 错误码 | 错误类型 | 说明 |
-|--------|---------|------|
-| 400 | `INVALID_DEVICE_ID` | 设备ID格式无效 |
-| 400 | `INVALID_PUBLIC_KEY` | 临时公钥格式无效 |
-| 400 | `INVALID_CURVE` | 不支持的 ECC 曲线 |
-| 403 | `DEVICE_NOT_AUTHORIZED` | 设备未授权进行密钥协商 |
-| 403 | `WBC_CHANNEL_NOT_READY` | WBC安全通道未建立 |
-| 403 | `WBC_CHANNEL_EXPIRED` | WBC安全通道已过期，需重新初始化 |
-| 422 | `KEY_EXCHANGE_FAILED` | ECDH密钥协商失败 |
-| 422 | `TRANSACTION_NOT_FOUND` | 交易流水号不存在 |
-| 500 | `HSM_ERROR` | HSM内部错误 |
-| 500 | `POSP_ERROR` | POSP处理错误 |
 
 ### 7.3 DH-ECC 密钥交换 (WhiteBox-Simple 模式)
 
 #### 7.3.1 流程说明
 
-适用于 TEE 类型为 `WhiteBox-Simple` 的设备。使用设备证书私钥签名认证，派生会话密钥用于 PIN 加密。
+适用于 终端安全环境类型为 `WhiteBox-Simple` 的设备。**每笔交易**都需要进行 DH-ECC 密钥交换，**后端必须使用 HSM** 进行密钥协商和派生，确保服务端私钥安全。
 
 ```mermaid
 sequenceDiagram
@@ -1190,10 +869,11 @@ sequenceDiagram
     participant App as 📱 Android App
     participant SDK as 🛡️ MPoC SDK
     participant Backend as 🖥️ A&M Backend
+    participant HSM as 🔐 RKI CloudHSM
 
-    Note over App,Backend: 前置条件: 设备证书已签发
+    Note over App,HSM: 前置条件: 设备证书已签发，每笔交易执行
     
-    App->>SDK: MpocSdk.initKeyExchange()
+    App->>SDK: MpocSdk.initKeyExchange(transactionId)
     
     rect rgb(227, 242, 253)
         Note over SDK: 准备密钥交换
@@ -1205,56 +885,81 @@ sequenceDiagram
     Note right of SDK: deviceCertificate + ephemeralPublicKey + signature
     
     rect rgb(255, 248, 225)
-        Note over Backend: 验证与响应
+        Note over Backend,HSM: HSM 内密钥协商
         Backend->>Backend: 验证设备证书有效性
         Backend->>Backend: 验证请求签名
-        Backend->>Backend: 生成服务端临时 ECDH 公钥
+        Backend->>HSM: 请求 ECDH 密钥协商
+        HSM->>HSM: 生成临时 ECDH 密钥对 (HoPub, HoPriv)
+        HSM->>HSM: 计算共享密钥 SharedSecret = ECDH(HoPriv, DePub)
+        HSM->>HSM: 派生 AES-256 密钥 = HKDF(SharedSecret, TxInfo)
+        HSM->>HSM: 存储交易密钥 (关联 transactionId)
+        HSM-->>Backend: 返回 HoPub + sessionId
     end
     
     Backend-->>SDK: serverEphemeralPublicKey + sessionId + kdfParams
     
     rect rgb(232, 245, 233)
         Note over SDK: 会话密钥派生
-        SDK->>SDK: ECDH 计算共享密钥
+        SDK->>SDK: ECDH 计算共享密钥 SharedSecret = ECDH(DePriv, HoPub)
         SDK->>SDK: HKDF-SHA256 派生 AES-256 会话密钥
         SDK->>SDK: 存储会话密钥到 WhiteBox 保护内存
+        SDK->>SDK: 销毁临时私钥 DePriv
     end
     
     SDK-->>App: callback.onKeyExchangeSuccess(sessionId)
 ```
 
+> ⚠️ **重要**: 
+> - **后端必须使用 HSM** 进行 ECDH 密钥协商，服务端临时私钥 (HoPriv) 不能离开 HSM 安全边界
+> - 每笔交易都需要执行密钥交换，确保前向安全性
+> - HSM 内派生的 AES 密钥用于后续 PIN 转加密操作
+
 #### 7.3.2 密钥层次结构
 
-WhiteBox-Simple 模式包含两层密钥：
+WhiteBox-Simple 模式包含两层密钥，**后端 HSM 负责服务端密钥管理**：
 
 ```mermaid
 graph TB
-    subgraph "设备级密钥 (长期)"
+    subgraph "设备端 (SDK)"
         DevKey["🔐 设备 ECC 密钥对<br/>(P-256, 存储在 Keystore)"]
         DevCert["📜 设备证书<br/>(CA 签发, 1年有效期)"]
+        EphKeyClient["🔑 客户端临时 ECDH 密钥对<br/>(每笔交易生成)"]
+        SessionKeyClient["🔒 AES-256 会话密钥<br/>(HKDF 派生)"]
     end
     
-    subgraph "会话级密钥 (短期)"
-        EphKey["🔑 临时 ECDH 密钥对<br/>(每次交换生成)"]
-        SessionKey["🔒 AES-256 会话密钥<br/>(HKDF 派生, 每次生成新密钥)"]
+    subgraph "后端 HSM"
+        EphKeyServer["🔑 服务端临时 ECDH 密钥对<br/>(HSM 内生成，私钥不出 HSM)"]
+        SessionKeyServer["🔒 AES-256 会话密钥<br/>(HSM 内 HKDF 派生)"]
     end
     
     DevKey --> DevCert
-    DevKey -->|签名认证| EphKey
-    EphKey -->|ECDH + HKDF| SessionKey
+    DevKey -->|签名认证| EphKeyClient
+    EphKeyClient -->|ECDH| SessionKeyClient
+    EphKeyServer -->|ECDH| SessionKeyServer
+    
+    EphKeyClient -.->|公钥交换| EphKeyServer
     
     style DevKey fill:#e3f2fd,stroke:#1976d2
     style DevCert fill:#e3f2fd,stroke:#1976d2
-    style EphKey fill:#fff8e1,stroke:#e65100
-    style SessionKey fill:#fff8e1,stroke:#e65100
+    style EphKeyClient fill:#fff8e1,stroke:#e65100
+    style SessionKeyClient fill:#fff8e1,stroke:#e65100
+    style EphKeyServer fill:#e8f5e9,stroke:#388e3c
+    style SessionKeyServer fill:#e8f5e9,stroke:#388e3c
 ```
 
-| 密钥类型 | 生命周期 | 用途 | 存储位置 |
-|---------|---------|------|---------|
-| 设备密钥对 | 1 年 (随证书) | 身份认证、请求签名 | Android Keystore |
-| 设备证书 | 1 年 (可续期) | 身份验证、公钥分发 | Android Keystore |
-| 临时 ECDH 密钥对 | 单次使用 | 会话密钥协商 | 内存 (用后销毁) |
-| AES-256 会话密钥 | 每笔交易生成新密钥 | PIN 加密 | WhiteBox 保护内存 |
+| 密钥类型 | 位置 | 生命周期 | 用途 | 存储位置 |
+|---------|------|---------|------|---------|
+| 设备密钥对 | SDK | 1 年 (随证书) | 身份认证、请求签名 | Android Keystore |
+| 设备证书 | SDK | 1 年 (可续期) | 身份验证、公钥分发 | Android Keystore |
+| 客户端临时 ECDH 密钥对 | SDK | 单次使用 | 会话密钥协商 | 内存 (用后销毁) |
+| 客户端 AES-256 会话密钥 | SDK | 每笔交易生成新密钥 | PIN 加密 | WhiteBox 保护内存 |
+| **服务端临时 ECDH 密钥对** | **HSM** | 单次使用 | 会话密钥协商 | **HSM 安全边界内** |
+| **服务端 AES-256 会话密钥** | **HSM** | 每笔交易生成新密钥 | PIN 转加密 | **HSM 安全边界内** |
+
+> ⚠️ **HSM 安全要求**: 
+> - 服务端临时私钥 (HoPriv) **必须在 HSM 内生成**，不能导出
+> - 服务端会话密钥 **必须在 HSM 内派生和使用**
+> - PIN 转加密操作 **必须在 HSM 内完成**
 
 #### 7.3.3 会话密钥生命周期
 
@@ -1285,12 +990,15 @@ stateDiagram-v2
 
 **端点**: `POST MPoC/api/keys/ecc/exchange`
 
-**负责模块**: WhiteBoxEngine
+**负责模块**: WhiteBoxEngine (SDK), HSM (Backend)
+
+> ⚠️ **重要**: 后端必须将密钥协商操作委托给 HSM，服务端私钥不能离开 HSM 安全边界
 
 **请求**:
 ```json
 {
   "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
+  "transactionId": "txn-20241230-001",
   "deviceCertificate": "-----BEGIN CERTIFICATE-----\nMIIDXTCCAkWgAwIBAgIJAJC1HiIAZAiU...\n-----END CERTIFICATE-----",
   "ephemeralPublicKey": "04a1b2c3d4e5f6...",
   "curve": "P-256",
@@ -1301,8 +1009,30 @@ stateDiagram-v2
 
 **签名计算方式**:
 ```
-signatureData = deviceId + ephemeralPublicKey + timestamp
+signatureData = deviceId + transactionId + ephemeralPublicKey + timestamp
 signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
+```
+
+**后端处理流程 (HSM 内)**:
+```mermaid
+sequenceDiagram
+    participant Backend as 🖥️ A&M Backend
+    participant HSM as 🔐 RKI CloudHSM
+
+    Backend->>HSM: 请求 ECDH 密钥协商
+    Note right of Backend: 传入客户端公钥 + transactionId
+    
+    rect rgb(232, 245, 233)
+        Note over HSM: HSM 安全边界内操作
+        HSM->>HSM: 生成临时 ECDH 密钥对 (HoPub, HoPriv)
+        HSM->>HSM: ECDH: SharedSecret = HoPriv × DePub
+        HSM->>HSM: HKDF: AES-256 Key = HKDF(SharedSecret, TxInfo)
+        HSM->>HSM: 存储 AES 密钥 (关联 sessionId)
+        HSM->>HSM: 销毁临时私钥 HoPriv
+    end
+    
+    HSM-->>Backend: 返回 HoPub + sessionId
+    Note right of HSM: 私钥和会话密钥不出 HSM
 ```
 
 **响应**:
@@ -1312,34 +1042,58 @@ signature = ECDSA_Sign(devicePrivateKey, SHA256(signatureData))
   "data": {
     "serverEphemeralPublicKey": "04f1e2d3c4b5a6...",
     "sessionId": "sess-20241230-abc123",
+    "transactionId": "txn-20241230-001",
     "expiresAt": "2024-12-30T10:30:00Z",
-    "maxTransactions": 100,
     "curve": "P-256",
     "kdfParams": {
       "algorithm": "HKDF-SHA256",
       "info": "PIN_ENCRYPTION_V1",
       "keyLength": 256
-    }
+    },
+    "hsmKeyRef": "hsm-key-ref-abc123"
   },
   "message": "Key exchange successful"
 }
 ```
 
+**响应字段说明**:
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `serverEphemeralPublicKey` | string | 服务端临时 ECDH 公钥 (HSM 内生成) |
+| `sessionId` | string | 会话标识符，用于后续 PIN 加密 |
+| `transactionId` | string | 交易流水号 (与请求一致) |
+| `expiresAt` | string | 会话密钥过期时间 (UTC) |
+| `hsmKeyRef` | string | HSM 内密钥引用 (用于 PIN 转加密) |
+
+**错误响应**:
+
+| 错误码 | 错误类型 | 说明 |
+|--------|---------|------|
+| 400 | `INVALID_PUBLIC_KEY` | 临时公钥格式无效 |
+| 400 | `INVALID_CURVE` | 不支持的 ECC 曲线 |
+| 401 | `CERTIFICATE_INVALID` | 设备证书无效或已过期 |
+| 401 | `SIGNATURE_INVALID` | 请求签名验证失败 |
+| 500 | `HSM_ERROR` | HSM 密钥协商失败 |
+| 503 | `HSM_UNAVAILABLE` | HSM 服务不可用 |
+
 ### 7.4 密钥存储位置总结
 
-| 密钥/证书类型 | SE 模式 | TEE 模式 | WhiteBox-WBC 模式 | WhiteBox-Simple 模式 |
-|--------------|---------|---------|------------------|-------------------|
-| 设备证书 | Android Keystore | Android Keystore | Android Keystore | Android Keystore |
-| 设备私钥 | Android Keystore | Android Keystore | Android Keystore | Android Keystore |
-| DUKPT IPEK | SE 芯片内 | TEE 安全区 | ❌ 不适用 | ❌ 不适用 |
-| CommWBC | ❌ 不适用 | ❌ 不适用 | WBC 保护内存 | ❌ 不适用 |
-| SCWBC | ❌ 不适用 | ❌ 不适用 | WBC 保护内存 | ❌ 不适用 |
-| 每交易密钥 | ❌ 不适用 | ❌ 不适用 | WBC 保护内存 | ❌ 不适用 |
-| 会话密钥 | ❌ 不适用 | ❌ 不适用 | ❌ 不适用 | WhiteBox 保护内存 |
+| 密钥/证书类型 | SE 模式 | TEE 模式 | WhiteBox-Simple 模式 |
+|--------------|---------|---------|-------------------|
+| 设备证书 | Android Keystore | Android Keystore | Android Keystore |
+| 设备私钥 | Android Keystore | Android Keystore | Android Keystore |
+| DUKPT IPEK | SE 芯片内 | TEE 安全区 | ❌ 不适用 |
+| CommWBC (鉴证加密) | WBC 保护内存 | WBC 保护内存 | WBC 保护内存 |
+| 客户端临时 ECDH 密钥对 | ❌ 不适用 | ❌ 不适用 | 内存 (用后销毁) |
+| 客户端会话密钥 | ❌ 不适用 | ❌ 不适用 | WhiteBox 保护内存 |
+| **服务端临时 ECDH 密钥对** | ❌ 不适用 | ❌ 不适用 | **HSM 安全边界内** |
+| **服务端会话密钥** | ❌ 不适用 | ❌ 不适用 | **HSM 安全边界内** |
 
 > ⚠️ **重要**: 
 > - DUKPT 密钥**不能**存储到 Android Keystore，必须存储在 TEE/SE 安全环境内
-> - WBC 相关密钥必须存储在 WBC 保护内存中，不能存储到普通内存或文件系统
+> - CommWBC 密钥用于**鉴证数据加密**，所有终端安全环境类型通用
+> - WhiteBox-Simple 模式的**服务端密钥必须在 HSM 内管理**，不能导出
 
 ---
 
@@ -1382,7 +1136,7 @@ sequenceDiagram
         SDK->>SDK: CryptoEngine.encryptPin(pin, pan)
         Note right of SDK: DUKPT 或 WhiteBox 加密
         SDK-->>App: encryptedPinBlock + keyIdentifier
-        Note right of SDK: keyIdentifier 根据 TEE 类型不同:<br/>DUKPT: ksn<br/>WhiteBox-WBC: transactionKeyId<br/>WhiteBox-Simple: sessionId
+        Note right of SDK: keyIdentifier 根据终端安全环境类型不同:<br/>DUKPT: ksn<br/>WhiteBox-Simple: sessionId
     end
     
     rect rgb(232, 245, 233)
@@ -1572,17 +1326,19 @@ flowchart TB
 
 ### 9.1 加密模式对比
 
-| 特性 | DUKPT (SE/TEE) | WhiteBox-WBC | WhiteBox-Simple |
-|------|----------------|--------------|-----------------|
-| **适用 TEE 类型** | SE, TEE | WhiteBox-WBC | WhiteBox-Simple |
-| **密钥来源** | HSM 下载 | WBC 三层架构 | ECDH 协商 |
-| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每笔交易唯一 | 每笔交易生成新密钥 |
-| **每笔交易密钥** | 自动派生唯一密钥 | 与 PSP ECDH 协商 | 每笔交易都生成新会话密钥 |
-| **网络依赖** | 仅初始下载 | 每笔交易需协商 | 每笔交易需重新交换 |
-| **离线支持** | 支持 | 不支持 | 不支持 (每笔交易需网络) |
-| **前向安全性** | 每笔交易独立 | 每笔交易独立 | 每笔交易独立 |
-| **安全级别** | ⭐⭐⭐ 最高 | ⭐⭐ 高 | ⭐⭐ 高 |
-| **商户绑定** | 无需 AuthCode | 需要 AuthCode | 无需 AuthCode |
+| 特性 | DUKPT (SE/TEE) | WhiteBox-Simple |
+|------|----------------|-----------------|
+| **适用终端安全环境类型** | SE, TEE | WhiteBox-Simple |
+| **密钥来源** | HSM 下载 | ECDH 协商 (HSM) |
+| **密钥生命周期** | 长期 (直到 KSN 耗尽) | 每笔交易生成新密钥 |
+| **每笔交易密钥** | 自动派生唯一密钥 | 每笔交易 ECDH 协商 |
+| **后端 HSM 要求** | 仅初始下载 | **必须使用 HSM** |
+| **网络依赖** | 仅初始下载 | 每笔交易需协商 |
+| **离线支持** | 支持 | 不支持 (每笔交易需网络) |
+| **前向安全性** | 每笔交易独立 | 每笔交易独立 |
+| **安全级别** | ⭐⭐⭐ 最高 | ⭐⭐ 高 |
+
+> 📌 **鉴证数据加密**: 所有终端安全环境类型都使用 CommWBC 加密鉴证数据，这是通用功能。
 
 ### 9.2 DUKPT 模式详解
 
@@ -1604,55 +1360,51 @@ FFFF 9876543210 E00001
 └───────────────────── 密钥集 ID (4 bits)
 ```
 
-### 9.3 WhiteBox-WBC 模式详解
+### 9.3 CommWBC 鉴证数据加密 (所有终端安全环境类型通用)
 
-WhiteBox-WBC 模式使用三层密钥架构，每笔交易与 PSP 进行 ECDH 协商：
+CommWBC 用于**鉴证数据加密**，是所有终端安全环境类型的通用功能：
 
 | 组件 | 说明 |
 |------|------|
-| **CommWBC** | 通信级白盒密钥，预置在 SDK 中 |
-| **SCWBC** | 会话级白盒密钥，A&M Backend 下发 |
-| **每笔交易密钥** | 与 PSP ECDH 协商，每笔交易唯一 |
-| **ECC 曲线** | P-256 (secp256r1) |
-| **密钥派生** | HKDF-SHA256 |
+| **CommWBC** | 通信级白盒密钥，预置在 SDK 中，用于鉴证数据加密 |
 | **加密算法** | AES-256-GCM |
+| **用途** | 设备指纹、安全信息、风险摘要等鉴证数据的加密 |
+| **适用范围** | 所有终端安全环境类型 (SE/TEE/WhiteBox-Simple) |
 
-**加密流程**:
-1. 使用 CommWBC 保护 AuthCode 传输
-2. 获取 SCWBC 建立与 A&M 的安全通道
-3. 每笔交易前与 PSP 进行 ECDH 协商
-4. 派生交易密钥用于 PIN/PAN 加密
-5. 交易完成后立即销毁交易密钥
+**鉴证数据加密流程**:
+1. SDK 收集设备鉴证数据 (hwFingerprint, securityInfo, riskSummary)
+2. 使用 CommWBC 对鉴证数据进行 AES-256-GCM 加密
+3. 通过 TLS 1.3 安全通道传输加密后的鉴证数据
+4. 后端解密并验证鉴证数据
+
+> ⚠️ **注意**: CommWBC **不用于 PIN 加密**，PIN 加密使用 DUKPT 或 WhiteBox-Simple 模式
 
 ### 9.4 WhiteBox-Simple 模式详解
 
-| 组件 | 说明 |
-|------|------|
-| **ECC 曲线** | P-256 (secp256r1) |
-| **密钥派生** | HKDF-SHA256 |
-| **加密算法** | AES-256-GCM |
-| **认证标签** | 128-bit |
+WhiteBox-Simple 模式用于 PIN 加密，**后端必须使用 HSM** 进行密钥协商：
+
+| 组件 | 位置 | 说明 |
+|------|------|------|
+| **ECC 曲线** | 双端 | P-256 (secp256r1) |
+| **客户端临时密钥对** | SDK | 每笔交易生成，用后销毁 |
+| **服务端临时密钥对** | **HSM** | HSM 内生成，私钥不出 HSM |
+| **密钥派生** | 双端 | HKDF-SHA256 |
+| **加密算法** | 双端 | AES-256-GCM |
+| **认证标签** | 双端 | 128-bit |
 
 **加密流程**:
 1. 客户端生成 ECC 临时密钥对
-2. 与服务端交换公钥
-3. ECDH 计算共享密钥
-4. HKDF 派生 AES-256 会话密钥
-5. AES-GCM 加密 PIN
+2. 与服务端交换公钥 (服务端公钥由 HSM 生成)
+3. 客户端: ECDH 计算共享密钥 → HKDF 派生 AES-256 会话密钥
+4. **HSM 内**: ECDH 计算共享密钥 → HKDF 派生 AES-256 会话密钥
+5. 客户端: AES-GCM 加密 PIN
+6. **HSM 内**: 使用会话密钥解密 PIN → 使用 Processor ZPK 重加密
 
-### 9.5 WhiteBox 模式对比
+> ⚠️ **HSM 安全要求**: 
+> - 服务端临时私钥必须在 HSM 内生成，不能导出
+> - 会话密钥派生和 PIN 转加密必须在 HSM 内完成
 
-| 特性 | WhiteBox-WBC | WhiteBox-Simple |
-|------|-------------|----------------|
-| **密钥架构** | 三层（CommWBC + SCWBC + 每笔交易密钥） | 两层（设备证书 + 会话密钥） |
-| **密钥协商** | 每笔交易与PSP协商 | 每笔交易生成新密钥（无需协商） |
-| **激活流程** | 需要AuthCode激活 | 无需激活，直接证书签发 |
-| **网络依赖** | 每笔交易需要网络协商 | 仅初始化时需要网络 |
-| **安全级别** | ⭐⭐ 高 | ⭐⭐ 高 |
-| **实现复杂度** | 复杂 | 简单 |
-| **适用场景** | 高安全要求，网络稳定 | 网络不稳定，快速部署 |
-
-### 9.6 PIN Block 格式
+### 9.5 PIN Block 格式
 
 采用 ISO 9564 Format 0：
 
@@ -1834,55 +1586,12 @@ stateDiagram-v2
 
 | 密钥类型 | 轮换周期 | 触发条件 | 轮换方式 |
 |---------|---------|---------|---------|
-| **WBC 主密钥** | 30-90 天 | 攻击成本评估 | 主动轮换 |
+| **CommWBC** | SDK 更新时 | SDK 版本升级 | SDK 更新 |
 | **设备证书** | 1-2 年 | 证书到期前 30 天 | 证书续期 |
-| **会话密钥** | 15 分钟 | 时间/交易数限制 | 会话刷新 |
+| **会话密钥** | 每笔交易 | 交易发起 | 重新 ECDH 协商 |
 | **DUKPT 密钥** | KSN 耗尽时 | KSN 计数器接近上限 | 重新下载 |
 
-#### 10.3.2 API: WBC 密钥轮换
-
-**端点**: `POST MPoC/api/keys/wbc/rotate`
-
-**负责模块**: WbcEngine
-
-> ⚠️ **注意**: 此 API 仅适用于 WhiteBox-WBC 模式
-
-**请求**:
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "currentKeyVersion": "1.0",
-  "rotationReason": "SCHEDULED",
-  "attackCostAssessment": {
-    "estimatedCost": 50000,
-    "confidenceLevel": "HIGH",
-    "assessmentDate": "2024-12-30T00:00:00Z"
-  },
-  "timestamp": "2024-12-30T10:00:00Z"
-}
-```
-
-**响应**:
-```json
-{
-  "code": 200,
-  "data": {
-    "newKeyVersion": "2.0",
-    "encryptedNewKey": "base64_encrypted_wbc_key",
-    "keyDerivationParams": {
-      "algorithm": "HKDF-SHA256",
-      "iterations": 10000,
-      "salt": "base64_salt"
-    },
-    "rotationId": "rot-20241230-001",
-    "expiresAt": "2025-03-30T00:00:00Z",
-    "nextRotationAt": "2025-02-28T00:00:00Z"
-  },
-  "message": "WBC key rotation successful"
-}
-```
-
-#### 10.3.3 API: 证书续期
+#### 10.3.2 API: 证书续期
 
 **端点**: `POST MPoC/api/certificates/renew`
 
@@ -1915,39 +1624,9 @@ stateDiagram-v2
 }
 ```
 
-#### 10.3.4 API: 会话密钥刷新
+#### 10.3.3 API: 会话密钥刷新 (已废弃)
 
-> ⚠️ **注意**: 此 API 仅适用于 WhiteBox-WBC 模式。WhiteBox-Simple 模式每笔交易都生成新的会话密钥，无需刷新。
-
-**端点**: `POST MPoC/api/keys/session/refresh`
-
-**负责模块**: WbcEngine (仅 WhiteBox-WBC 模式)
-
-**请求**:
-```json
-{
-  "deviceId": "dev-550e8400-e29b-41d4-a716-446655440000",
-  "currentSessionId": "sess-20241230-abc123",
-  "refreshReason": "TIME_LIMIT",
-  "newEphemeralPublicKey": "04a1b2c3d4e5f6...",
-  "timestamp": "2024-12-30T10:00:00Z"
-}
-```
-
-**响应**:
-```json
-{
-  "code": 200,
-  "data": {
-    "newSessionId": "sess-20241230-def456",
-    "serverEphemeralPublicKey": "04f1e2d3c4b5a6...",
-    "expiresAt": "2024-12-31T10:00:00Z",
-    "maxTransactions": 50,
-    "refreshId": "ref-20241230-001"
-  },
-  "message": "Session key refreshed successfully"
-}
-```
+> ⚠️ **注意**: WhiteBox-Simple 模式每笔交易都通过 DH-ECC 协商生成新的会话密钥，无需单独的刷新 API。此 API 已废弃。
 
 ### 10.4 设备状态管理
 
@@ -1955,13 +1634,12 @@ stateDiagram-v2
 
 **设备状态定义**：
 
-| 状态 | 说明 | 适用TEE类型 | 可执行操作 |
-|------|------|------------|-----------|
-| `REGISTERED` | 设备已注册 | 所有类型 | AuthCode激活(仅WhiteBox-WBC)、证书签发(SE/TEE/WhiteBox-Simple直接进行) |
-| `ACTIVATED` | 设备已通过AuthCode激活，可进行证书签发 | WhiteBox-WBC | 证书签发、密钥初始化 |
-| `ACTIVE` | 设备完全可用，已完成证书签发和密钥初始化 | 所有类型 | 交易处理、密钥轮换 |
-| `SUSPENDED` | 设备被暂停，无法进行交易 | 所有类型 | 等待恢复 |
-| `DEREGISTERED` | 设备已注销，无法使用 | 所有类型 | 无 |
+| 状态 | 说明 | 可执行操作 |
+|------|------|-----------|
+| `REGISTERED` | 设备已注册 | 证书签发、密钥初始化 |
+| `ACTIVE` | 设备完全可用，已完成证书签发和密钥初始化 | 交易处理、密钥轮换 |
+| `SUSPENDED` | 设备被暂停，无法进行交易 | 等待恢复 |
+| `DEREGISTERED` | 设备已注销，无法使用 | 无 |
 
 **状态转换流程**：
 
@@ -1971,16 +1649,9 @@ flowchart TB
     
     Register --> Registered[状态: REGISTERED]
     
-    Registered -->|SE/TEE/WhiteBox-Simple| CertReq[证书签发]
-    Registered -->|WhiteBox-WBC| AuthCode[AuthCode激活]
+    Registered --> CertReq[证书签发]
     
-    AuthCode --> AuthSuccess{激活成功?}
-    AuthSuccess -->|是| Activated[状态: ACTIVATED]
-    AuthSuccess -->|否| Registered
-    
-    Activated --> CertReq2[证书签发]
     CertReq --> CertSuccess{证书签发成功?}
-    CertReq2 --> CertSuccess
     
     CertSuccess -->|是| KeyInit[密钥初始化]
     CertSuccess -->|否| Registered
@@ -1994,7 +1665,6 @@ flowchart TB
     %% 异常状态转换
     Active -->|安全威胁/管理操作| Suspended[状态: SUSPENDED]
     Registered -->|安全威胁/管理操作| Suspended
-    Activated -->|安全威胁/管理操作| Suspended
     
     Suspended -->|恢复操作| Active
     
@@ -2002,19 +1672,17 @@ flowchart TB
     Suspended -->|注销操作| Deregistered
     
     style Registered fill:#fff3e0,stroke:#f57c00
-    style Activated fill:#e8f5e9,stroke:#388e3c
     style Active fill:#e3f2fd,stroke:#1976d2
     style Suspended fill:#ffebee,stroke:#d32f2f
     style Deregistered fill:#f3e5f5,stroke:#7b1fa2
 ```
 
-**不同TEE类型的状态流程差异**：
+**状态流程说明**：
 
-| TEE类型 | 状态流程 | 说明 |
+| 终端安全环境类型 | 状态流程 | 说明 |
 |---------|---------|------|
-| SE/TEE | `REGISTERED` → `ACTIVE` | 直接进行证书签发和密钥初始化 |
-| WhiteBox-Simple | `REGISTERED` → `ACTIVE` | 直接进行证书签发和密钥初始化 |
-| WhiteBox-WBC | `REGISTERED` → `ACTIVATED` → `ACTIVE` | 需要先通过AuthCode激活 |
+| SE/TEE | `REGISTERED` → `ACTIVE` | 证书签发 + DUKPT 密钥下载 |
+| WhiteBox-Simple | `REGISTERED` → `ACTIVE` | 证书签发 + 每笔交易 DH-ECC 协商 |
 
 #### 10.4.2 API: 设备状态查询
 
@@ -2619,8 +2287,7 @@ sequenceDiagram
 | PKCS#10 | Public Key Cryptography Standards #10 | CSR 标准格式 |
 | HKDF | HMAC-based Key Derivation Function | 基于 HMAC 的密钥派生函数 |
 | WBC | White-Box Cryptography | 白盒加密，软件实现的安全方案 |
-| CommWBC | Communication White-Box Cryptography | 通信级白盒加密密钥，预置在 SDK 中 |
-| SCWBC | Session Communication White-Box Cryptography | 会话级白盒加密密钥，A&M Backend 下发 |
+| CommWBC | Communication White-Box Cryptography | 通信级白盒加密密钥，预置在 SDK 中，**用于鉴证数据加密 (所有终端安全环境类型通用)** |
 | BEK | Backend Encryption Key | 后端加密密钥 |
 | AuthCode | Authorization Code | 商户侧绑定授权凭证 |
 | DF | Device Fingerprint | 设备指纹，包含软硬件测量值的唯一标识 |
@@ -2653,17 +2320,13 @@ MpocSdk.initialize(config, callback)
 // DUKPT 模式 (SDK 内部自动执行)
   → callback.onKeyReady(ksn)
 
-// WBC 模式 (WhiteBox-WBC)
-MpocSdk.initializeWbc(authCode, callback)
-  → callback.onWbcChannelReady(swAuthLevel)
-  → callback.onWbcInitFailed(error)
+// CommWBC 鉴证数据加密 (所有终端安全环境类型通用)
+MpocSdk.encryptAttestationData(attestationData, callback)
+  → callback.onAttestationDataEncrypted(encryptedData)
+  → callback.onEncryptionFailed(error)
 
-MpocSdk.exchangeTransactionKey(transactionId, callback)
-  → callback.onTransactionKeyReady(keyId)
-  → callback.onTransactionKeyFailed(error)
-
-// WhiteBox-Simple 模式
-MpocSdk.initKeyExchange()
+// WhiteBox-Simple 模式 - 每笔交易密钥交换 (后端使用 HSM)
+MpocSdk.initKeyExchange(transactionId, callback)
   → callback.onKeyExchangeSuccess(sessionId)
   → callback.onKeyExchangeFailed(error)
 
@@ -2710,7 +2373,7 @@ MpocSdk.syncOfflineData(callback)
 
 // 工具方法
 MpocSdk.getDeviceStatus() → DeviceStatus
-MpocSdk.getTeeType() → TeeType (SE/TEE/WhiteBox-WBC/WhiteBox-Simple)
+MpocSdk.getTeeType() → TeeType (SE/TEE/WhiteBox-Simple)
 MpocSdk.forceKeyRefresh() → void
 MpocSdk.deregisterDevice(callback) → void
 ```
@@ -2723,7 +2386,7 @@ MpocSdk.deregisterDevice(callback) → void
 |------|------|---------|
 | v1.0 | 2024-12-30 | 初始版本 |
 | v1.1 | 2024-12-30 | 增加 CSR 证书签发 API |
-| v1.2 | 2024-12-31 | 明确 TEE 类型与密钥模式对应关系 |
+| v1.2 | 2024-12-31 | 明确 终端安全环境类型与密钥模式对应关系 |
 | v2.0 | 2024-12-31 | 按 SDK 初始化调用顺序重构文档结构，明确模块职责划分 |
 | v2.1 | 2024-12-31 | 统一 securityInfo 字段；交易鉴证增加 transactionId；RKI API 前缀改为 /RKI/api/v1；补充 accessToken 使用说明和 API Header |
 | v2.2 | 2024-12-31 | 明确交易处理职责划分：SDK 负责 Token 获取和 PIN 加密，App 通过 A&M Backend 提交交易 |
@@ -2742,3 +2405,5 @@ MpocSdk.deregisterDevice(callback) → void
 | v3.6 | 2026-01-08 | 修改AuthCode获取流程：更新7.2.1节为SUNBAY平台模式，机构客户在平台绑定设备到商户，商户在设备上输入AuthCode激活 |
 | v3.7 | 2026-01-08 | 修复文档错误和不一致性：更新版本号到v3.7、修正PIN加密方案描述、统一WhiteBox-Simple安全级别为⭐⭐高、移除通信图中HTTPS推送引用、更新WhiteBox-Simple描述 |
 | v3.8 | 2026-01-09 | 重新梳理设备状态流程：统一设备状态定义(REGISTERED/ACTIVATED/ACTIVE/SUSPENDED/DEREGISTERED)、修复章节编号错误(13.1-13.4)、完善设备状态转换图、修正证书签发前置条件 |
+| v3.9 | 2026-01-16 | 重构 WhiteBox 模式：删除 WBC 安全通道建立流程，CommWBC 改为专用于鉴证数据加密，安全通道生命周期管理改用 TLS 模式，WhiteBox-Simple 模式的 DH-ECC 密钥协商后端必须使用 HSM |
+| v4.0 | 2026-01-16 | 移除 WhiteBox-WBC 作为独立终端安全环境类型，CommWBC 鉴证数据加密改为所有终端安全环境类型通用功能；明确 CSR 密钥对由 Android Keystore 生成；简化设备状态流程，移除 ACTIVATED 状态 |
